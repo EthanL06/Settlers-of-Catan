@@ -314,6 +314,80 @@ public class Tile {
 
     }
 
+    public void setAdjacentEdgesToVertices() {
+        // TODO: complete this!!
+        for (int i = 0; i < vertices.length; i++) {
+            Vertex v = vertices[i];
+            Edge[] adjacentEdges = new Edge[3];
+
+            switch (i) {
+                case Vertex.NORTHWEST -> {
+                    adjacentEdges[0] = edges[Edge.NORTHWEST];
+                    adjacentEdges[1] = edges[Edge.NORTH];
+
+                    // if northern tile exists
+                    if (adjacentTiles[Tile.NORTH] != null) {
+                        adjacentEdges[2] = adjacentTiles[Tile.NORTH].getEdge(Edge.SOUTHWEST);
+                    } else if (adjacentTiles[Tile.NORTHEAST] != null) {
+                        adjacentEdges[2] = adjacentTiles[Tile.NORTHEAST].getEdge(Edge.NORTHEAST);
+                    }
+                }
+                case Vertex.NORTHEAST -> {
+                    adjacentEdges[0] = edges[Edge.NORTH];
+                    adjacentEdges[1] = edges[Edge.NORTHEAST];
+
+                    if (adjacentTiles[Tile.NORTH] != null) {
+                        adjacentEdges[2] = adjacentTiles[Tile.NORTH].getEdge(Edge.SOUTHEAST);
+                    } else if (adjacentTiles[Tile.NORTHWEST] != null) {
+                        adjacentEdges[2] = adjacentTiles[Tile.NORTHWEST].getEdge(Edge.NORTHWEST);
+                    }
+                }
+                case Vertex.EAST -> {
+                    adjacentEdges[0] = edges[Edge.NORTHEAST];
+                    adjacentEdges[1] = edges[Edge.SOUTHEAST];
+
+                    if (adjacentTiles[Tile.NORTHEAST] != null) {
+                        adjacentEdges[2] = adjacentTiles[Tile.NORTHEAST].getEdge(Edge.SOUTH);
+                    } else if (adjacentTiles[Tile.SOUTHEAST] != null) {
+                        adjacentEdges[2] = adjacentTiles[Tile.SOUTHEAST].getEdge(Tile.NORTH);
+                    }
+                }
+                case Vertex.SOUTHEAST -> {
+                    adjacentEdges[0] = edges[Edge.SOUTHEAST];
+                    adjacentEdges[1] = edges[Edge.SOUTH];
+
+                    if (adjacentTiles[Tile.SOUTHEAST] != null) {
+                        adjacentEdges[2] = adjacentTiles[Tile.SOUTHEAST].getEdge(Edge.SOUTHWEST);
+                    } else if (adjacentTiles[Tile.SOUTH] != null) {
+                        adjacentEdges[2] = adjacentTiles[Tile.SOUTH].getEdge(Edge.NORTHEAST);
+                    }
+                }
+                case Vertex.SOUTHWEST -> {
+                    adjacentEdges[0] = edges[Edge.SOUTH];
+                    adjacentEdges[1] = edges[Edge.SOUTHWEST];
+
+                    if (adjacentTiles[Tile.SOUTH] != null) {
+                        adjacentEdges[2] = adjacentTiles[Tile.SOUTH].getEdge(Edge.NORTHWEST);
+                    } else if (adjacentTiles[Tile.SOUTHWEST] != null) {
+                        adjacentEdges[2] = adjacentTiles[Tile.SOUTHWEST].getEdge(Edge.SOUTHEAST);
+                    }
+                }
+                case Vertex.WEST -> {
+                    adjacentEdges[0] = edges[Edge.SOUTHWEST];
+                    adjacentEdges[1] = edges[Edge.NORTHWEST];
+
+                    if (adjacentTiles[Tile.SOUTHWEST] != null) {
+                        adjacentEdges[2] = adjacentTiles[Tile.SOUTHWEST].getEdge(Edge.NORTH);
+                    } else if (adjacentTiles[Tile.NORTHWEST] != null) {
+                        adjacentEdges[2] = adjacentTiles[Tile.NORTHWEST].getEdge(Edge.SOUTH);
+                    }
+                }
+            }
+
+            v.setAdjacentEdges(adjacentEdges);
+        }
+    }
+
     public Vertex getVertex(int orientation) {
         return vertices[orientation];
     }

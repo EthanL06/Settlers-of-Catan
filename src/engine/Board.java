@@ -63,6 +63,23 @@ public class Board {
         return isValidCoordinate(new Location(row, col));
     }
 
+    public Location availableRoadPlacements() {
+        ArrayList<Structure> playerStructures = GameState.getCurrentPlayer().getStructures();
+        ArrayList<Location> availableLocations = new ArrayList<>();
+
+        // must connect to a structure
+        // can lead of an existing road
+        // can not be placed on top of another road
+        // can not be placed on top of a structure
+        // can not go through other players' structures
+
+//        for (Structure s: playerStructures) {
+//
+//        }
+
+        return null;
+    }
+
     public void placeSettlement(Location location) {
         // TODO: complete
 
@@ -77,6 +94,7 @@ public class Board {
             Structure structure = new Structure(location, GameState.getCurrentPlayer());
             GameState.getCurrentPlayer().addStructure(structure);
             tile.getVertex(location.getOrientation()).setStructure(structure);
+            structure.setVertex(tile.getVertex(location.getOrientation()));
 
             System.out.println("Current tile: " + Arrays.toString(tile.getVertices()));
             Tile[] adjacentTiles = tile.getAdjacentTiles();
@@ -204,6 +222,7 @@ public class Board {
             for (int col = 0; col < board[row].length; col++) {
                 board[row][col].setAdjacentVertices();
                 board[row][col].setAdjacentEdges();
+                board[row][col].setAdjacentEdgesToVertices();
             }
         }
     }

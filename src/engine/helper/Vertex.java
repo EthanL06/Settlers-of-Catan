@@ -9,6 +9,7 @@ public class Vertex {
 
     private int id;
     private Structure structure;
+    private Edge[] adjacentEdges;
 
     public Vertex(){
         this(null);
@@ -17,6 +18,11 @@ public class Vertex {
     public Vertex(Structure structure){
         this.structure = structure;
         this.id = count++;
+        this.adjacentEdges = new Edge[3];
+    }
+
+    public void setAdjacentEdges(Edge[] adjacentEdges) {
+        this.adjacentEdges = adjacentEdges;
     }
 
     public Structure getStructure() {

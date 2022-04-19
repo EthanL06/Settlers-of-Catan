@@ -7,7 +7,7 @@ public class GameRunner {
 
     public static void main(String[] args) {
         sc = new Scanner(System.in);
-        System.out.print("Enter number of players:");
+        System.out.print("Enter number of players: ");
         int numPlayers = sc.nextInt();
         System.out.print("Enter game seed: ");
         int seed = sc.nextInt();
