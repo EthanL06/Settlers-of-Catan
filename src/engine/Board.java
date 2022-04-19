@@ -65,17 +65,31 @@ public class Board {
 
     public Location availableRoadPlacements() {
         ArrayList<Structure> playerStructures = GameState.getCurrentPlayer().getStructures();
-        ArrayList<Location> availableLocations = new ArrayList<>();
+        ArrayList<Edge> availableEdges = new ArrayList<>(); // available edges to place a road on
 
+        // TODO: complete this!!
         // must connect to a structure
         // can lead of an existing road
         // can not be placed on top of another road
         // can not be placed on top of a structure
         // can not go through other players' structures
 
-//        for (Structure s: playerStructures) {
-//
-//        }
+        for (Structure s: playerStructures) {
+            Vertex currentVertex = s.getVertex();
+            Edge[] adjacentEdges = currentVertex.getAdjacentEdges();
+
+            for (Edge e: adjacentEdges) {
+                // no road adjacent to current structure
+
+                Vertex[] adjacentVertices = e.getAdjacentVertices(); // one of the vertices must equal currentVertex
+                Vertex correspondingVertex = (adjacentVertices[0].equals(currentVertex)) ? adjacentVertices[1] : adjacentVertices[0];
+
+                // must adhere to distance rule
+                if (correspondingVertex.getStructure() == null) {
+                    availableEdges.add(e);
+                }
+            }
+        }
 
         return null;
     }
@@ -126,6 +140,7 @@ public class Board {
             Road road = new Road(location, GameState.getCurrentPlayer());
             GameState.getCurrentPlayer().addRoad(road);
             tile.getEdge(location.getOrientation()).setRoad(road);
+            road.setEdge(tile.getEdge(location.getOrientation())); // TODO: may change
 
             System.out.println("Current tile: " + Arrays.toString(tile.getEdges()));
             Tile[] adjacentTiles = tile.getAdjacentTiles();
@@ -223,6 +238,7 @@ public class Board {
                 board[row][col].setAdjacentVertices();
                 board[row][col].setAdjacentEdges();
                 board[row][col].setAdjacentEdgesToVertices();
+                board[row][col].setAdjacentVerticesToEdges();
             }
         }
     }

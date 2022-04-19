@@ -9,6 +9,7 @@ public class Edge {
 
     private int id;
     private Road road;
+    private Vertex[] adjacentVertices;
 
     public Edge() {
         this(null);
@@ -17,6 +18,15 @@ public class Edge {
     public Edge(Road road) {
         this.road = road;
         this.id = count++;
+        adjacentVertices = new Vertex[2];
+    }
+
+    public Vertex[] getAdjacentVertices() {
+        return adjacentVertices;
+    }
+
+    public void setAdjacentVertices(Vertex[] adjacentVertices) {
+        this.adjacentVertices = adjacentVertices;
     }
 
     public void setRoad(Road road) {

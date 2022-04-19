@@ -388,6 +388,42 @@ public class Tile {
         }
     }
 
+    public void setAdjacentVerticesToEdges() {
+        for (int i = 0; i < edges.length; i++) {
+            Edge e = edges[i];
+            Vertex[] adjacentVertices = new Vertex[2];
+
+            switch (i) {
+                case Edge.NORTHWEST -> {
+                    adjacentVertices[0] = vertices[Vertex.WEST];
+                    adjacentVertices[1] = vertices[Vertex.NORTHWEST];
+                }
+                case Edge.NORTH -> {
+                    adjacentVertices[0] = vertices[Vertex.NORTHWEST];
+                    adjacentVertices[1] = vertices[Vertex.NORTHEAST];
+                }
+                case Edge.NORTHEAST -> {
+                    adjacentVertices[0] = vertices[Vertex.NORTHEAST];
+                    adjacentVertices[1] = vertices[Vertex.EAST];
+                }
+                case Edge.SOUTHEAST -> {
+                    adjacentVertices[0] = vertices[Vertex.EAST];
+                    adjacentVertices[1] = vertices[Vertex.SOUTHEAST];
+                }
+                case Edge.SOUTH -> {
+                    adjacentVertices[0] = vertices[Vertex.SOUTHEAST];
+                    adjacentVertices[1] = vertices[Vertex.SOUTHWEST];
+                }
+                case Edge.SOUTHWEST -> {
+                    adjacentVertices[0] = vertices[Vertex.SOUTHWEST];
+                    adjacentVertices[1] = vertices[Vertex.WEST];
+                }
+            }
+
+            e.setAdjacentVertices(adjacentVertices);
+        }
+    }
+
     public Vertex getVertex(int orientation) {
         return vertices[orientation];
     }

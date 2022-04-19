@@ -25,6 +25,10 @@ public class Vertex {
         this.adjacentEdges = adjacentEdges;
     }
 
+    public Edge[] getAdjacentEdges() {
+        return adjacentEdges;
+    }
+
     public Structure getStructure() {
         return structure;
     }
