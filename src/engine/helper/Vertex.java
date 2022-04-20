@@ -37,6 +37,10 @@ public class Vertex {
         this.structure = structure;
     }
 
+    public int getId() {
+        return id;
+    }
+
     public String toString() {
         return "" + id + (structure != null ? " Structure owned by " + structure.getOwner() : "");
     }

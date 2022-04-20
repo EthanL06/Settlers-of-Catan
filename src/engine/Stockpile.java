@@ -21,6 +21,7 @@ public class Stockpile {
         this.wool = wool;
     }
 
+    // region Add Resources
     public void add(ResourceType resource) {
         switch (resource) {
             case BRICK -> this.bricks++;
@@ -40,7 +41,9 @@ public class Stockpile {
             case WOOL -> this.wool += count;
         }
     }
+    // endregion
 
+    // region Remove Resources
     public void remove(ResourceType resource) {
         switch (resource) {
             case BRICK -> this.bricks--;
@@ -60,7 +63,9 @@ public class Stockpile {
             case WOOL -> this.wool -= count;
         }
     }
+    // endregion
 
+    // region Getters
     public int getTotal() {
         return this.bricks + this.wheat + this.wood + this.ore + this.wool;
     }
@@ -84,6 +89,7 @@ public class Stockpile {
     public int getWool() {
         return wool;
     }
+    // endregion
 }
 
 

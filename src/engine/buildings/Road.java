@@ -16,12 +16,12 @@ public class Road {
         this.edge = null;
     }
 
-    public Edge getEdge() {
-        return edge;
-    }
-
     public void setEdge(Edge edge) {
         this.edge = edge;
+    }
+
+    public Edge getEdge() {
+        return edge;
     }
 
     public Location getLocation() {

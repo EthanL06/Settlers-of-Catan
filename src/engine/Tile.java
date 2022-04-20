@@ -28,14 +28,8 @@ public class Tile {
         location = null;
     }
 
-    public Tile getAdjacentTile(int orientation) {
-        return adjacentTiles[orientation];
-    }
-
-    public Tile[] getAdjacentTiles() {
-        return adjacentTiles;
-    }
-
+    //region Setters
+    // region Adjacent Tiles/Edges/Vertices
     public void setAdjacentTiles() {
         Tile[][] board = Board.getBoard();
         int row = location.getRow();
@@ -157,6 +151,7 @@ public class Tile {
         // Tile is on the edge of board
         if (adjacentTile == null) {
             edges[edgeOrientation] = new Edge();
+            Board.addEdge(edges[edgeOrientation]);
             return;
         }
 
@@ -181,6 +176,7 @@ public class Tile {
 
             edges[edgeOrientation] = e;
             adjacentTile.setEdge(e, tileEdgeOrientation);
+            Board.addEdge(e);
         }
 
     }
@@ -301,6 +297,8 @@ public class Tile {
 
         if (!vertexExists) {
             Vertex v = new Vertex();
+            Board.addVertex(v);
+
             vertices[vertexOrientation] = v;
 
             if (tileOneExists) {
@@ -423,6 +421,34 @@ public class Tile {
             e.setAdjacentVertices(adjacentVertices);
         }
     }
+    // endregion
+
+    public void setEdge(Edge edge, int orientation) {
+        edges[orientation] = edge;
+    }
+
+    public void setNumber(int number) {
+        this.number = number;
+    }
+
+    public void setVertex(Vertex vertex, int orientation) {
+        vertices[orientation] = vertex;
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
+    }
+
+    //endregion
+
+    //region Getters
+    public Tile getAdjacentTile(int orientation) {
+        return adjacentTiles[orientation];
+    }
+
+    public Tile[] getAdjacentTiles() {
+        return adjacentTiles;
+    }
 
     public Vertex getVertex(int orientation) {
         return vertices[orientation];
@@ -440,18 +466,6 @@ public class Tile {
         return vertices;
     }
 
-    public void setVertex(Vertex vertex, int orientation) {
-        vertices[orientation] = vertex;
-    }
-
-    public void setEdge(Edge edge, int orientation) {
-        edges[orientation] = edge;
-    }
-
-    public void setNumber(int number) {
-        this.number = number;
-    }
-
     public int getNumber() {
         return number;
     }
@@ -463,10 +477,7 @@ public class Tile {
     public Location getLocation() {
         return location;
     }
-
-    public void setLocation(Location location) {
-        this.location = location;
-    }
+    //endregion
 
     public String toString(){
         return type.toString() +  " " + number;

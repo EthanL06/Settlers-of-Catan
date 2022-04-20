@@ -21,10 +21,6 @@ public class Edge {
         adjacentVertices = new Vertex[2];
     }
 
-    public Vertex[] getAdjacentVertices() {
-        return adjacentVertices;
-    }
-
     public void setAdjacentVertices(Vertex[] adjacentVertices) {
         this.adjacentVertices = adjacentVertices;
     }
@@ -33,8 +29,16 @@ public class Edge {
         this.road = road;
     }
 
+    public Vertex[] getAdjacentVertices() {
+        return adjacentVertices;
+    }
+
     public Road getRoad() {
         return road;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public String toString() {

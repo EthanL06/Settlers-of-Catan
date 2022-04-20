@@ -1,5 +1,6 @@
 package engine;
 
+import com.sun.source.tree.Tree;
 import engine.buildings.Road;
 import engine.buildings.Structure;
 import engine.cards.DevelopmentCard;
@@ -16,8 +17,8 @@ import java.util.*;
 public class Board {
 
     private static Tile[][] board;
-    private Vertex[][][] structures;
-    private Edge[][][] roads;
+    private static HashMap<Integer, Vertex> vertices = new HashMap<>(); // key: vertex id, value: vertex
+    private static HashMap<Integer, Edge> edges = new HashMap<>(); // key: edge id, value: edge
 
     private HashMap<Location, Tile> tileLocations;
     private Location robberLocation;
@@ -34,66 +35,7 @@ public class Board {
         System.out.println(this);
     }
 
-    public static Tile[][] getBoard() {
-        return board;
-    }
-
-    public static Tile getTile(int row, int col) {
-        return getTile(new Location(row, col));
-    }
-
-    public static Tile getTile(Location l) {
-        if (!isValidCoordinate(l.getRow(), l.getCol())) {
-            return null;
-        }
-
-        return board[l.getRow()][l.getCol()];
-    }
-
-    public static boolean isValidCoordinate(Location location) {
-        try {
-            Tile locationTest = board[location.getRow()][location.getCol()];
-            return true;
-        } catch (ArrayIndexOutOfBoundsException e) {
-            return false;
-        }
-    }
-
-    public static boolean isValidCoordinate(int row, int col) {
-        return isValidCoordinate(new Location(row, col));
-    }
-
-    public Location availableRoadPlacements() {
-        ArrayList<Structure> playerStructures = GameState.getCurrentPlayer().getStructures();
-        ArrayList<Edge> availableEdges = new ArrayList<>(); // available edges to place a road on
-
-        // TODO: complete this!!
-        // must connect to a structure
-        // can lead of an existing road
-        // can not be placed on top of another road
-        // can not be placed on top of a structure
-        // can not go through other players' structures
-
-        for (Structure s: playerStructures) {
-            Vertex currentVertex = s.getVertex();
-            Edge[] adjacentEdges = currentVertex.getAdjacentEdges();
-
-            for (Edge e: adjacentEdges) {
-                // no road adjacent to current structure
-
-                Vertex[] adjacentVertices = e.getAdjacentVertices(); // one of the vertices must equal currentVertex
-                Vertex correspondingVertex = (adjacentVertices[0].equals(currentVertex)) ? adjacentVertices[1] : adjacentVertices[0];
-
-                // must adhere to distance rule
-                if (correspondingVertex.getStructure() == null) {
-                    availableEdges.add(e);
-                }
-            }
-        }
-
-        return null;
-    }
-
+    // region Structure/Road Placement
     public void placeSettlement(Location location) {
         // TODO: complete
 
@@ -110,38 +52,16 @@ public class Board {
             tile.getVertex(location.getOrientation()).setStructure(structure);
             structure.setVertex(tile.getVertex(location.getOrientation()));
 
-            System.out.println("Current tile: " + Arrays.toString(tile.getVertices()));
-            Tile[] adjacentTiles = tile.getAdjacentTiles();
-
-            for (Tile t: adjacentTiles) {
-                if (t != null) {
-                    System.out.println(t + ": " + Arrays.toString(t.getVertices()));
-                } else {
-                    System.out.println("null");
-                }
-            }
-        } else {
-            System.out.println("Vertex already has a structure");
-        }
-    }
-
-    public void placeRoad(Location location) {
-        // TODO: complete
-
-        Tile tile = getTile(location);
-        if (tile == null) {
-            System.out.println("Invalid location");
-            return;
-        }
-
-        if (tile.getEdge(location.getOrientation()).getRoad() == null) {
-            System.out.println("Player placed a road");
-
-            Road road = new Road(location, GameState.getCurrentPlayer());
-            GameState.getCurrentPlayer().addRoad(road);
-            tile.getEdge(location.getOrientation()).setRoad(road);
-            road.setEdge(tile.getEdge(location.getOrientation())); // TODO: may change
-
+//            System.out.println("Current tile: " + Arrays.toString(tile.getVertices()));
+//            Tile[] adjacentTiles = tile.getAdjacentTiles();
+//
+//            for (Tile t: adjacentTiles) {
+//                if (t != null) {
+//                    System.out.println(t + ": " + Arrays.toString(t.getVertices()));
+//                } else {
+//                    System.out.println("null");
+//                }
+//            }
             System.out.println("Current tile: " + Arrays.toString(tile.getEdges()));
             Tile[] adjacentTiles = tile.getAdjacentTiles();
 
@@ -152,45 +72,149 @@ public class Board {
                     System.out.println("null");
                 }
             }
-
         } else {
-            System.out.println("Edge already has a road");
+            System.out.println("Vertex already has a structure");
         }
     }
 
-    private void initializeBoard() {
-        board = new Tile[5][];
-        structures = new Vertex[5][][]; // TODO: need to decide on how to do this
-        roads = new Edge[5][][];
+    public boolean placeRoad(Location location) {
+        // TODO: complete
 
-//        board[0] = new Tile[3];
-//        board[1] = new Tile[4];
-//        board[2] = new Tile[5];
-//        board[3] = new Tile[4];
-//        board[4] = new Tile[3];
+        Tile tile = getTile(location);
 
-        for (int i = 0; i < board.length; i++) {
-            switch (i) {
-                case 0, 4 -> {
-                    board[i] = new Tile[3];
-                    structures[i] = new Vertex[3][6];
-                    roads[i] = new Edge[3][6];
+        if (tile == null) {
+            System.out.println("Invalid location");
+            return false;
+        }
+
+        Set<Edge> availableRoadPlacements = availableRoadPlacements();
+        Edge selectedEdge = tile.getEdge(location.getOrientation());
+
+        if (availableRoadPlacements.contains(selectedEdge)) {
+            System.out.println("Player placed a road");
+
+            Road road = new Road(location, GameState.getCurrentPlayer());
+            GameState.getCurrentPlayer().addRoad(road);
+            tile.getEdge(location.getOrientation()).setRoad(road);
+            road.setEdge(tile.getEdge(location.getOrientation()));
+
+            System.out.println("Current tile: " + Arrays.toString(tile.getEdges()));
+            Tile[] adjacentTiles = tile.getAdjacentTiles();
+
+            for (Tile t : adjacentTiles) {
+                if (t != null) {
+                    System.out.println(t + ": " + Arrays.toString(t.getEdges()));
+                } else {
+                    System.out.println("null");
                 }
-                case 1, 3 -> {
-                    board[i] = new Tile[4];
-                    structures[i] = new Vertex[4][6];
-                    roads[i] = new Edge[4][6];
-                }
-                case 2 -> {
-                    board[i] = new Tile[5];
-                    structures[i] = new Vertex[5][6];
-                    roads[i] = new Edge[5][6];
+            }
+
+            return true;
+        } else {
+            System.out.println("Invalid location");
+            return false;
+        }
+    }
+
+    public Set<Edge> availableRoadPlacements() {
+        Player currentPlayer = GameState.getCurrentPlayer();
+        ArrayList<Structure> playerStructures = currentPlayer.getStructures();
+        Set<Edge> availableEdges = new HashSet<>(); // available edges to place a road on
+
+        // must connect to a structure
+        // can lead of an existing road
+        // can not be placed on top of another road
+        // can not be placed on top of a structure
+        // can not go through other players' structures
+
+        for (Structure s: playerStructures) {
+            Vertex vertex = s.getVertex();
+            Edge[] adjacentEdges = vertex.getAdjacentEdges();
+
+            for (Edge e: adjacentEdges) {
+                if (e == null) continue;
+                // if an adjacent edge to a structure doesn't have a road on it
+                if (e.getRoad() == null) {
+                    availableEdges.add(e);
                 }
             }
         }
 
+        for (Road r: currentPlayer.getRoads()) {
+            Vertex[] adjacentVertices = r.getEdge().getAdjacentVertices();
+
+            for (Vertex v: adjacentVertices) {
+                // cannot build road through another player's structure
+                if (v.getStructure() != null && !v.getStructure().getOwner().equals(currentPlayer)) continue;
+
+                // either the vertex is occupied by the current player's structure or the adjacent edges have no road
+                Edge[] adjacentEdges = v.getAdjacentEdges();
+
+                for (Edge e: adjacentEdges) {
+                    if (e == null) continue;
+
+                    if (e.getRoad() == null) {
+                        availableEdges.add(e);
+                    }
+                }
+            }
+        }
+
+        return availableEdges;
+    }
+    // endregion
+
+    // region Initialization
+    private void initializeBoard() {
+        board = new Tile[5][];
+
+        board[0] = new Tile[3];
+        board[1] = new Tile[4];
+        board[2] = new Tile[5];
+        board[3] = new Tile[4];
+        board[4] = new Tile[3];
+
+//        for (int i = 0; i < board.length; i++) {
+//            switch (i) {
+//                case 0, 4 -> {
+//                    board[i] = new Tile[3];
+//                }
+//                case 1, 3 -> {
+//                    board[i] = new Tile[4];
+//                }
+//                case 2 -> {
+//                    board[i] = new Tile[5];
+//                }
+//            }
+//        }
+
         setTiles();
         setNumberTokens();
+    }
+
+    private void initializeDevelopmentCards() {
+        developmentCards = new Stack<>();
+
+        final int KNIGHT_COUNT = 14;
+        final int VICTORY_POINT_COUNT = 5;
+        final int PROGRESS_COUNT = 6;
+
+        String[] victoryPointNames = {"Chapel", "Great Hall", "Library", "Market", "University"};
+        String[] progressNames = {"Monopoly", "Road Building", "Year of Plenty"};
+
+        for (int i = 0; i < KNIGHT_COUNT; i++) {
+            developmentCards.push(new DevelopmentCard("Knight", DevelopmentCardType.KNIGHT));
+        }
+
+        for (int i = 0; i < VICTORY_POINT_COUNT; i++) {
+            developmentCards.push(new DevelopmentCard(victoryPointNames[i], DevelopmentCardType.VICTORY_POINT));
+        }
+
+        for (int i = 0; i < PROGRESS_COUNT/2; i++) {
+            developmentCards.push(new DevelopmentCard(progressNames[i], DevelopmentCardType.PROGRESS));
+        }
+
+        Collections.shuffle(developmentCards, Dice.getRef());
     }
 
     private void setTiles() {
@@ -302,31 +326,46 @@ public class Board {
             board[2][2].setNumber(tokens.remove(0));
         }
     }
+    // endregion
 
-    private void initializeDevelopmentCards() {
-        developmentCards = new Stack<>();
-
-        final int KNIGHT_COUNT = 14;
-        final int VICTORY_POINT_COUNT = 5;
-        final int PROGRESS_COUNT = 6;
-
-        String[] victoryPointNames = {"Chapel", "Great Hall", "Library", "Market", "University"};
-        String[] progressNames = {"Monopoly", "Road Building", "Year of Plenty"};
-
-        for (int i = 0; i < KNIGHT_COUNT; i++) {
-            developmentCards.push(new DevelopmentCard("Knight", DevelopmentCardType.KNIGHT));
-        }
-
-        for (int i = 0; i < VICTORY_POINT_COUNT; i++) {
-            developmentCards.push(new DevelopmentCard(victoryPointNames[i], DevelopmentCardType.VICTORY_POINT));
-        }
-
-        for (int i = 0; i < PROGRESS_COUNT/2; i++) {
-            developmentCards.push(new DevelopmentCard(progressNames[i], DevelopmentCardType.PROGRESS));
-        }
-
-        Collections.shuffle(developmentCards, Dice.getRef());
+    // region Static methods
+    public static void addVertex(Vertex v) {
+        vertices.put(v.getId(), v);
     }
+
+    public static void addEdge(Edge e) {
+        edges.put(e.getId(), e);
+    }
+
+    public static boolean isValidCoordinate(Location location) {
+        try {
+            Tile locationTest = board[location.getRow()][location.getCol()];
+            return true;
+        } catch (ArrayIndexOutOfBoundsException e) {
+            return false;
+        }
+    }
+
+    public static boolean isValidCoordinate(int row, int col) {
+        return isValidCoordinate(new Location(row, col));
+    }
+
+    public static Tile[][] getBoard() {
+        return board;
+    }
+
+    public static Tile getTile(int row, int col) {
+        return getTile(new Location(row, col));
+    }
+
+    public static Tile getTile(Location l) {
+        if (!isValidCoordinate(l.getRow(), l.getCol())) {
+            return null;
+        }
+
+        return board[l.getRow()][l.getCol()];
+    }
+    // endregion
 
     public String toString() {
         return Arrays.deepToString(board).replace("], ", "]\n").replace("[[", "[").replace("]]", "]");

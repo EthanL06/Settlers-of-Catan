@@ -32,13 +32,23 @@ public class GameState {
             String[] input = sc.nextLine().split(" ");
 
             board.placeSettlement(new Location(Integer.parseInt(input[0]), Integer.parseInt(input[1]), Integer.parseInt(input[2])));
+            System.out.println("Available road placements: " + board.availableRoadPlacements());
 
             System.out.println("Enter location to place road: ");
 
             input = sc.nextLine().split(" ");
-            board.placeRoad(new Location(Integer.parseInt(input[0]), Integer.parseInt(input[1]), Integer.parseInt(input[2])));
+            boolean flag = board.placeRoad(new Location(Integer.parseInt(input[0]), Integer.parseInt(input[1]), Integer.parseInt(input[2])));
+
+            while (!flag) {
+                System.out.println("Invalid road placement, try again: ");
+                input = sc.nextLine().split(" ");
+                flag = board.placeRoad(new Location(Integer.parseInt(input[0]), Integer.parseInt(input[1]), Integer.parseInt(input[2])));
+            }
+
+            System.out.println("Available road placements: " + board.availableRoadPlacements());
 
             nextTurn();
+
             System.out.println("Enter location to place settlement: ");
         }
     }
@@ -46,10 +56,6 @@ public class GameState {
     public static void nextTurn() {
         currentPlayerIndex++;
         currentPlayer = players[currentPlayerIndex];
-    }
-
-    public static Player getCurrentPlayer() {
-        return currentPlayer;
     }
 
     private void initializePlayers(int numPlayers) {
@@ -77,5 +83,7 @@ public class GameState {
         currentPlayer = players[0];
     }
 
-
+    public static Player getCurrentPlayer() {
+        return currentPlayer;
+    }
 }
