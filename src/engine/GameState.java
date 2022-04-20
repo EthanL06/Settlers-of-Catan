@@ -9,6 +9,8 @@ import java.util.TreeMap;
 
 public class GameState {
 
+    public static boolean gameStart = true;
+
     private static Player currentPlayer = null;
     private static int currentPlayerIndex = 0;
 
@@ -25,31 +27,51 @@ public class GameState {
 
         initializePlayers(numPlayers);
 
+        while (true) {
+            placeSettlement();
+            placeSettlement();
+
+            gameStart = false;
+
+            placeRoad();
+            placeRoad();
+        }
+    }
+
+    public void placeSettlement() {
         Scanner sc = GameRunner.sc;
+
+        System.out.println("Available settlement placements: " + board.availableSettlementPlacements(gameStart));
         System.out.println("Enter location to place settlement: ");
+        String[] input = sc.nextLine().split(" ");
 
-        while (sc.hasNextLine()) {
-            String[] input = sc.nextLine().split(" ");
+        if (input[0].equals("skip"))
+            return;
 
-            board.placeSettlement(new Location(Integer.parseInt(input[0]), Integer.parseInt(input[1]), Integer.parseInt(input[2])));
-            System.out.println("Available road placements: " + board.availableRoadPlacements());
+        boolean flag = board.placeSettlement(new Location(Integer.parseInt(input[0]), Integer.parseInt(input[1]), Integer.parseInt(input[2])));
 
-            System.out.println("Enter location to place road: ");
-
+        while (!flag) {
+            System.out.println("Available settlement placements: " + board.availableSettlementPlacements(gameStart));
+            System.out.println("Invalid settlement placement, try again: ");
             input = sc.nextLine().split(" ");
-            boolean flag = board.placeRoad(new Location(Integer.parseInt(input[0]), Integer.parseInt(input[1]), Integer.parseInt(input[2])));
+            flag = board.placeSettlement(new Location(Integer.parseInt(input[0]), Integer.parseInt(input[1]), Integer.parseInt(input[2])));
+        }
+    }
 
-            while (!flag) {
-                System.out.println("Invalid road placement, try again: ");
-                input = sc.nextLine().split(" ");
-                flag = board.placeRoad(new Location(Integer.parseInt(input[0]), Integer.parseInt(input[1]), Integer.parseInt(input[2])));
-            }
+    public void placeRoad() {
+        Scanner sc = GameRunner.sc;
 
+        System.out.println("Available road placements: " + board.availableRoadPlacements());
+        System.out.println("Enter location to place road: ");
+        String[] input = sc.nextLine().split(" ");
+
+        boolean flag = board.placeRoad(new Location(Integer.parseInt(input[0]), Integer.parseInt(input[1]), Integer.parseInt(input[2])));
+
+        while (!flag) {
             System.out.println("Available road placements: " + board.availableRoadPlacements());
-
-            nextTurn();
-
-            System.out.println("Enter location to place settlement: ");
+            System.out.println("Invalid road placement, try again: ");
+            input = sc.nextLine().split(" ");
+            flag = board.placeRoad(new Location(Integer.parseInt(input[0]), Integer.parseInt(input[1]), Integer.parseInt(input[2])));
         }
     }
 

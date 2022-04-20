@@ -1,6 +1,5 @@
 package engine;
 
-import com.sun.source.tree.Tree;
 import engine.buildings.Road;
 import engine.buildings.Structure;
 import engine.cards.DevelopmentCard;
@@ -36,44 +35,41 @@ public class Board {
     }
 
     // region Structure/Road Placement
-    public void placeSettlement(Location location) {
+    public boolean placeSettlement(Location location) {
         // TODO: complete
 
         Tile tile = getTile(location);
         if (tile == null) {
             System.out.println("Invalid location");
-            return;
+            return false;
         }
 
-        if (tile.getVertex(location.getOrientation()).getStructure() == null) {
+        Vertex vertex = tile.getVertex(location.getOrientation());
+
+        if (availableSettlementPlacements(GameState.gameStart).contains(vertex)) {
             System.out.println("Player placed a settlement");
             Structure structure = new Structure(location, GameState.getCurrentPlayer());
             GameState.getCurrentPlayer().addStructure(structure);
             tile.getVertex(location.getOrientation()).setStructure(structure);
             structure.setVertex(tile.getVertex(location.getOrientation()));
 
-//            System.out.println("Current tile: " + Arrays.toString(tile.getVertices()));
-//            Tile[] adjacentTiles = tile.getAdjacentTiles();
-//
-//            for (Tile t: adjacentTiles) {
-//                if (t != null) {
-//                    System.out.println(t + ": " + Arrays.toString(t.getVertices()));
-//                } else {
-//                    System.out.println("null");
-//                }
-//            }
-            System.out.println("Current tile: " + Arrays.toString(tile.getEdges()));
+            System.out.println("Current tile vertices: " + Arrays.toString(tile.getVertices()));
             Tile[] adjacentTiles = tile.getAdjacentTiles();
 
             for (Tile t: adjacentTiles) {
                 if (t != null) {
-                    System.out.println(t + ": " + Arrays.toString(t.getEdges()));
+                    System.out.println(t + ": " + Arrays.toString(t.getVertices()));
                 } else {
                     System.out.println("null");
                 }
             }
+
+            System.out.println();
+
+            return true;
         } else {
             System.out.println("Vertex already has a structure");
+            return false;
         }
     }
 
@@ -98,7 +94,7 @@ public class Board {
             tile.getEdge(location.getOrientation()).setRoad(road);
             road.setEdge(tile.getEdge(location.getOrientation()));
 
-            System.out.println("Current tile: " + Arrays.toString(tile.getEdges()));
+            System.out.println("Current tile edges: " + Arrays.toString(tile.getEdges()));
             Tile[] adjacentTiles = tile.getAdjacentTiles();
 
             for (Tile t : adjacentTiles) {
@@ -108,6 +104,8 @@ public class Board {
                     System.out.println("null");
                 }
             }
+
+            System.out.println();
 
             return true;
         } else {
@@ -163,26 +161,25 @@ public class Board {
         return availableEdges;
     }
 
-    public Set<Vertex> availableSettlementPlacements(boolean startOfGame) {
+    public HashSet<Vertex> availableSettlementPlacements(boolean startOfGame) {
         // build on unoccupied vertex
         // none of the 3 adjacent vertices contain a structure **distance rule
         // must always be connected to a road
         // exception where it's the start of the game and the player can build anywhere
 
-        Set<Vertex> availableVertices = new HashSet<>();
         Player currentPlayer = GameState.getCurrentPlayer();
+
         ArrayList<Vertex> allVertices = new ArrayList<>();
-        Set<Vertex> excludedVertices = new HashSet<>();
+        HashSet<Vertex> availableVertices = new HashSet<>();
+        HashSet<Vertex> excludedVertices = new HashSet<>();
 
         for (Integer key: vertices.keySet()) {
             allVertices.add(vertices.get(key));
         }
 
+        // excludes all vertices which are occupied by a structure and break the distance rule
         for (Vertex v: allVertices) {
-            if (v.getStructure() != null) {
-                excludedVertices.add(v);
-                continue;
-            }
+            if (v.getStructure() == null) continue;
 
             // the vertex has a structure
             excludedVertices.add(v);
@@ -198,19 +195,17 @@ public class Board {
 
                 excludedVertices.add(adjacentVertex);
             }
-
-
-
-
         }
 
         // includes all vertices that are unoccupied and do not violate the distance rule
+        System.out.println("Excluded vertices: " + excludedVertices);
         if (startOfGame) {
             for (Vertex v: allVertices) {
                 if (excludedVertices.contains(v)) continue;
                 availableVertices.add(v);
-                return availableVertices;
             }
+
+            return availableVertices;
         }
 
         // TODO: complete!! ** need to test
@@ -218,6 +213,7 @@ public class Board {
         for (Road r: currentPlayer.getRoads()) {
             Edge e = r.getEdge();
             Vertex[] adjacentVertices = e.getAdjacentVertices();
+            System.out.println("adjacent vertices: " + Arrays.toString(adjacentVertices));
 
             for (Vertex v: adjacentVertices) {
                 if (excludedVertices.contains(v)) continue;

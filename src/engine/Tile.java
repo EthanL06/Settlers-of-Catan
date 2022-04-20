@@ -313,7 +313,6 @@ public class Tile {
     }
 
     public void setAdjacentEdgesToVertices() {
-        // TODO: complete this!!
         for (int i = 0; i < vertices.length; i++) {
             Vertex v = vertices[i];
             Edge[] adjacentEdges = new Edge[3];
