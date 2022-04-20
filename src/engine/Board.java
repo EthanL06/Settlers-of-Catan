@@ -162,6 +162,74 @@ public class Board {
 
         return availableEdges;
     }
+
+    public Set<Vertex> availableSettlementPlacements(boolean startOfGame) {
+        // build on unoccupied vertex
+        // none of the 3 adjacent vertices contain a structure **distance rule
+        // must always be connected to a road
+        // exception where it's the start of the game and the player can build anywhere
+
+        Set<Vertex> availableVertices = new HashSet<>();
+        Player currentPlayer = GameState.getCurrentPlayer();
+        ArrayList<Vertex> allVertices = new ArrayList<>();
+        Set<Vertex> excludedVertices = new HashSet<>();
+
+        for (Integer key: vertices.keySet()) {
+            allVertices.add(vertices.get(key));
+        }
+
+        for (Vertex v: allVertices) {
+            if (v.getStructure() != null) {
+                excludedVertices.add(v);
+                continue;
+            }
+
+            // the vertex has a structure
+            excludedVertices.add(v);
+
+            Edge[] adjacentEdges = v.getAdjacentEdges();
+
+            // distance rule
+            for (Edge e: adjacentEdges) {
+                if (e == null) continue;
+
+                Vertex[] adjacentVertices = e.getAdjacentVertices();
+                Vertex adjacentVertex = adjacentVertices[0].equals(v) ? adjacentVertices[1] : adjacentVertices[0];
+
+                excludedVertices.add(adjacentVertex);
+            }
+
+
+
+
+        }
+
+        // includes all vertices that are unoccupied and do not violate the distance rule
+        if (startOfGame) {
+            for (Vertex v: allVertices) {
+                if (excludedVertices.contains(v)) continue;
+                availableVertices.add(v);
+                return availableVertices;
+            }
+        }
+
+        // TODO: complete!! ** need to test
+        // settlement must connect to player's roads
+        for (Road r: currentPlayer.getRoads()) {
+            Edge e = r.getEdge();
+            Vertex[] adjacentVertices = e.getAdjacentVertices();
+
+            for (Vertex v: adjacentVertices) {
+                if (excludedVertices.contains(v)) continue;
+                availableVertices.add(v);
+            }
+        }
+
+        return availableVertices;
+    }
+
+
+
     // endregion
 
     // region Initialization
