@@ -8,7 +8,7 @@ import engine.helper.Vertex;
 public class Tile {
     public static final int NORTHWEST = 0, NORTH = 1, NORTHEAST = 2, SOUTHEAST = 3, SOUTH = 4, SOUTHWEST = 5;
 
-    private final ResourceType type;
+    private final ResourceType resource;
     private int number;
 
     private Tile[] adjacentTiles;
@@ -17,8 +17,8 @@ public class Tile {
 
     private Location location;
 
-    public Tile(ResourceType type){
-        this.type = type;
+    public Tile(ResourceType resource){
+        this.resource = resource;
         number = -1;
 
         adjacentTiles = new Tile[6];
@@ -469,17 +469,19 @@ public class Tile {
         return number;
     }
 
-    public ResourceType getType() {
-        return type;
+    public ResourceType getResource() {
+        return resource;
     }
 
     public Location getLocation() {
         return location;
     }
+
+
     //endregion
 
     public String toString(){
-        return type.toString() +  " " + number;
+        return resource.toString() +  " " + number;
     }
 
     public String printAdjacentTiles() {

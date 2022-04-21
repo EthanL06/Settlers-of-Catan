@@ -70,26 +70,32 @@ public class Stockpile {
         return this.bricks + this.wheat + this.wood + this.ore + this.wool;
     }
 
-    public int getBricks() {
-        return bricks;
-    }
+    public int getResourceCount(ResourceType resource) {
+        switch (resource) {
+            case BRICK -> {
+                return this.bricks;
+            }
+            case WHEAT -> {
+                return this.wheat;
+            }
+            case WOOD -> {
+                return this.wood;
+            }
+            case ORE -> {
+                return this.ore;
+            }
+            case WOOL -> {
+                return this.wool;
+            }
+        }
 
-    public int getWheat() {
-        return wheat;
-    }
-
-    public int getWood() {
-        return wood;
-    }
-
-    public int getOre() {
-        return ore;
-    }
-
-    public int getWool() {
-        return wool;
+        return 0;
     }
     // endregion
+
+    public String toString() {
+        return "Stockpile: B-" + this.bricks + " W-" + this.wheat + " WO-" + this.wood + " O-" + this.ore + " WOOL-" + this.wool;
+    }
 }
 
 

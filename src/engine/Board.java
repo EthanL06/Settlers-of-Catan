@@ -20,16 +20,17 @@ public class Board {
     private static HashMap<Integer, Edge> edges = new HashMap<>(); // key: edge id, value: edge
 
     private HashMap<Location, Tile> tileLocations;
+    private HashMap<Integer, ArrayList<Tile>> resourceTiles; // key: tile number, value: list of tiles
     private Location robberLocation;
 
-    private final Stockpile stockpile;
+    private final Stockpile boardStockpile;
     private Stack<DevelopmentCard> developmentCards;
 
     public Board() {
         initializeBoard();
         initializeDevelopmentCards();
 
-        stockpile = new Stockpile(19, 19, 19, 19, 19);
+        boardStockpile = new Stockpile(19, 19, 19, 19, 19);
 
         System.out.println(this);
     }
@@ -228,6 +229,46 @@ public class Board {
 
     // endregion
 
+    // region Resources
+    public void produceResources(int diceRoll) {
+        // TODO: need to implement exception where player gets resources from 2nd settlement adjacent tiles
+        ArrayList<Tile> tiles = resourceTiles.get(diceRoll);
+        
+        for (Tile t: tiles) {
+            ResourceType resource = t.getResource();
+            Vertex[] tileVertices = t.getVertices();
+            
+            for (Vertex v: tileVertices) {
+                if (v.getStructure() == null) continue;
+                
+                Structure s = v.getStructure();
+                Player owner = s.getOwner();
+                Stockpile playerStockpile = owner.getStockpile();
+                
+                switch (s.getType()) {
+                    case SETTLEMENT -> {
+                        final int AMOUNT = 1;
+                        if (boardStockpile.getResourceCount(resource) < AMOUNT) continue;
+                        
+                        transferResources(boardStockpile, playerStockpile, resource, AMOUNT);
+                    }
+                    case CITY -> {
+                        final int AMOUNT = 2;
+                        if (boardStockpile.getResourceCount(resource) < AMOUNT) continue;
+                        
+                        transferResources(boardStockpile, playerStockpile, resource, AMOUNT);
+                    }
+                }
+            }
+        }
+    }
+    
+    public void transferResources(Stockpile giver, Stockpile receiver, ResourceType resource, int amount) {
+        giver.remove(resource, amount);
+        receiver.add(resource, amount);
+    }
+    // endregion
+
     // region Initialization
     private void initializeBoard() {
         board = new Tile[5][];
@@ -283,6 +324,8 @@ public class Board {
 
     private void setTiles() {
         tileLocations = new HashMap<>();
+        resourceTiles = new HashMap<>();
+        
         ArrayList<Tile> tiles = new ArrayList<>();
 
         for (int i = 0; i < 4; i++) {
@@ -307,7 +350,7 @@ public class Board {
                 board[row][col] = tiles.remove(0);
                 board[row][col].setLocation(location);
 
-                if (board[row][col].getType() == ResourceType.DESERT) {
+                if (board[row][col].getResource() == ResourceType.DESERT) {
                     robberLocation = location;
                 }
 
@@ -347,47 +390,60 @@ public class Board {
 
         // left column
         for (int row = 0; row < board.length; row++) {
-            if (board[row][0].getType() != ResourceType.DESERT && board[row][0].getNumber() == -1) {
+            if (board[row][0].getResource() != ResourceType.DESERT && board[row][0].getNumber() == -1) {
                 board[row][0].setNumber(tokens.remove(0));
             }
         }
 
         // bottom row
         for (int col = 0; col < board[board.length-1].length; col++) {
-            if (board[4][col].getType() != ResourceType.DESERT && board[4][col].getNumber() == -1) {
+            if (board[4][col].getResource() != ResourceType.DESERT && board[4][col].getNumber() == -1) {
                 board[4][col].setNumber(tokens.remove(0));
             }
         }
 
         // right column
         for (int row = board.length-1; row >= 0; row--) {
-            if (board[row][board[row].length-1].getType() != ResourceType.DESERT && board[row][board[row].length-1].getNumber() == -1) {
+            if (board[row][board[row].length-1].getResource() != ResourceType.DESERT && board[row][board[row].length-1].getNumber() == -1) {
                 board[row][board[row].length-1].setNumber(tokens.remove(0));
             }
         }
 
         // top row
-        if (board[0][1].getType() != ResourceType.DESERT && board[0][1].getNumber() == -1) {
+        if (board[0][1].getResource() != ResourceType.DESERT && board[0][1].getNumber() == -1) {
             board[0][1].setNumber(tokens.remove(0));
         }
 
         // middle row
         for (int row = 1; row < board.length-1; row++) {
-            if (board[row][1].getType() != ResourceType.DESERT && board[row][1].getNumber() == -1) {
+            if (board[row][1].getResource() != ResourceType.DESERT && board[row][1].getNumber() == -1) {
                 board[row][1].setNumber(tokens.remove(0));
             }
         }
 
         // middle right column
         for (int row = 3; row >= 0; row--) {
-            if (board[row][board[row].length-2].getType() != ResourceType.DESERT && board[row][board[row].length-2].getNumber() == -1) {
+            if (board[row][board[row].length-2].getResource() != ResourceType.DESERT && board[row][board[row].length-2].getNumber() == -1) {
                 board[row][board[row].length-2].setNumber(tokens.remove(0));
             }
         }
 
         // middle
-        if (board[2][2].getType() != ResourceType.DESERT && board[2][2].getNumber() == -1) {
+        if (board[2][2].getResource() != ResourceType.DESERT && board[2][2].getNumber() == -1) {
             board[2][2].setNumber(tokens.remove(0));
+        }
+        
+        for (int row = 0; row < board.length; row++) {
+            for (int col = 0; col < board[row].length; col++) {
+                if (board[row][col].getNumber() == -1) continue;
+                int number = board[row][col].getNumber();
+                
+                if (!resourceTiles.containsKey(number)) {
+                    resourceTiles.put(number, new ArrayList<>());
+                }
+
+                resourceTiles.get(number).add(board[row][col]);
+            }
         }
     }
     // endregion

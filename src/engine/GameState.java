@@ -29,12 +29,20 @@ public class GameState {
 
         while (true) {
             placeSettlement();
-            placeSettlement();
+//            placeSettlement();
 
             gameStart = false;
 
             placeRoad();
-            placeRoad();
+//            placeRoad();
+
+            int diceRoll = Dice.roll();
+            System.out.println("Dice roll: " + diceRoll);
+            board.produceResources(diceRoll);
+
+            for (Player player: players) {
+                System.out.println(player + " - " + player.getStockpile());
+            }
         }
     }
 
@@ -64,6 +72,9 @@ public class GameState {
         System.out.println("Available road placements: " + board.availableRoadPlacements());
         System.out.println("Enter location to place road: ");
         String[] input = sc.nextLine().split(" ");
+
+        if (input[0].equals("skip"))
+            return;
 
         boolean flag = board.placeRoad(new Location(Integer.parseInt(input[0]), Integer.parseInt(input[1]), Integer.parseInt(input[2])));
 

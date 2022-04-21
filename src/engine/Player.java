@@ -60,6 +60,10 @@ public class Player {
         return roads;
     }
 
+    public Stockpile getStockpile() {
+        return stockpile;
+    }
+
     public String toString() {
         return "Player " + id + ": " + color;
     }
