@@ -319,6 +319,43 @@ public class Board {
         return true;
     }
 
+
+    // All players around robber tile
+    public ArrayList<Player> getAvailablePlayersToStealFrom() {
+        Tile robberTile = tileLocations.get(robberLocation);
+        Vertex[] vertices = robberTile.getVertices();
+
+        ArrayList<Player> availablePlayers = new ArrayList<>();
+
+        for (Vertex v: vertices) {
+            Structure structure = v.getStructure();
+
+            if (structure != null && !structure.getOwner().equals(GameState.getCurrentPlayer()) && structure.getOwner().getStockpile().getTotal() > 0) {
+                availablePlayers.add(structure.getOwner());
+            }
+        }
+
+        return availablePlayers;
+    }
+
+    public void stealRandomResource(Player player) {
+        Player currentPlayer = GameState.getCurrentPlayer();
+        ArrayList<ResourceType> availableResourcesToSteal = new ArrayList<>();
+
+        for (ResourceType resource: ResourceType.values()) {
+            if (player.getStockpile().getResourceCount(resource) > 0) {
+                availableResourcesToSteal.add(resource);
+            }
+        }
+
+        ResourceType randomResource = availableResourcesToSteal.get(Dice.getRef().nextInt(availableResourcesToSteal.size()));
+
+        Stockpile currentPlayerStockpile = currentPlayer.getStockpile();
+        Stockpile playerStockpile = player.getStockpile();
+
+        transferResources(playerStockpile, currentPlayerStockpile, randomResource, 1);
+    }
+
     // region Initialization
     private void initializeBoard() {
         board = new Tile[5][];

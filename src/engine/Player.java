@@ -64,6 +64,10 @@ public class Player {
         return stockpile;
     }
 
+    public int getId() {
+        return id;
+    }
+
     public String toString() {
         return "Player " + id + ": " + color;
     }
