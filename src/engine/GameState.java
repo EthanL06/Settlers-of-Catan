@@ -27,22 +27,67 @@ public class GameState {
 
         initializePlayers(numPlayers);
 
-        while (true) {
+        setUpPhase();
+        resourceProductionPhase();
+    }
+
+    public void setUpPhase() {
+        for (int i = 0; i < players.length; i++) {
             placeSettlement();
-//            placeSettlement();
-
-            gameStart = false;
-
             placeRoad();
-//            placeRoad();
+            nextTurn();
+        }
 
-            int diceRoll = Dice.roll();
-            System.out.println("Dice roll: " + diceRoll);
-            board.produceResources(diceRoll);
+        for (int i = 0; i < players.length; i++) {
+            placeSettlement();
+            placeRoad();
+            board.produceResources(currentPlayer.getStructures().get(1));
 
             for (Player player: players) {
                 System.out.println(player + " - " + player.getStockpile());
             }
+
+            nextTurn();
+        }
+
+        gameStart = false;
+    }
+
+    public void resourceProductionPhase() {
+        int diceRoll = Dice.roll();
+        System.out.println(currentPlayer + " rolled " + diceRoll);
+
+        if (diceRoll == 7) {
+            rolledSeven();
+        } else {
+            board.produceResources(diceRoll);
+        }
+    }
+
+    public void rolledSeven() {
+        Scanner sc = GameRunner.sc;
+
+        for (Player player: players) {
+            if (player.getStockpile().getTotal() > 7) {
+                final int AMOUNT_TO_DISCARD = player.getStockpile().getTotal() / 2;
+
+                // TODO: implement way for each player to choose which resources to discard
+            }
+        }
+
+        moveRobber();
+    }
+
+    public void moveRobber() {
+        Scanner sc = GameRunner.sc;
+
+        System.out.println("Enter location to move robber: ");
+        String[] input = sc.nextLine().split(" ");
+        boolean flag = board.moveRobber(new Location(Integer.parseInt(input[0]), Integer.parseInt(input[1])));
+
+        while (!flag) {
+            System.out.println("Invalid location. Enter location to move robber: ");
+            flag = board.moveRobber(new Location(Integer.parseInt(input[0]), Integer.parseInt(input[1])));
         }
     }
 
@@ -88,7 +133,12 @@ public class GameState {
 
     public static void nextTurn() {
         currentPlayerIndex++;
+
+        if (currentPlayerIndex >= players.length)
+            currentPlayerIndex = 0;
+
         currentPlayer = players[currentPlayerIndex];
+        System.out.println("Next turn: " + currentPlayer);
     }
 
     private void initializePlayers(int numPlayers) {

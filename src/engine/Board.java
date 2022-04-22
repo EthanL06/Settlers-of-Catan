@@ -231,10 +231,12 @@ public class Board {
 
     // region Resources
     public void produceResources(int diceRoll) {
-        // TODO: need to implement exception where player gets resources from 2nd settlement adjacent tiles
         ArrayList<Tile> tiles = resourceTiles.get(diceRoll);
         
         for (Tile t: tiles) {
+            if (t.getLocation().equals(robberLocation)) continue;
+            if (t.getResource() == ResourceType.DESERT) continue;
+
             ResourceType resource = t.getResource();
             Vertex[] tileVertices = t.getVertices();
             
@@ -262,12 +264,60 @@ public class Board {
             }
         }
     }
+
+    // when player gains resources from second settlement at beginning of game
+    public void produceResources(Structure structure) {
+        Vertex vertex = structure.getVertex();
+        ArrayList<Tile> productionTiles = new ArrayList<>();
+
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[i].length; j++) {
+                Vertex[] tileVertices = board[i][j].getVertices();
+
+                for (Vertex v: tileVertices) {
+                    if (v.equals(vertex)) {
+                        productionTiles.add(board[i][j]);
+                        break;
+                    }
+                }
+            }
+        }
+
+        for (Tile t: productionTiles) {
+            ResourceType resource = t.getResource();
+
+            if (t.getLocation().equals(robberLocation)) continue;
+            if (resource == ResourceType.DESERT) continue;
+
+            switch (structure.getType()) {
+                case SETTLEMENT -> {
+                    final int AMOUNT = 1;
+                    if (boardStockpile.getResourceCount(resource) < AMOUNT) continue;
+
+                    transferResources(boardStockpile, structure.getOwner().getStockpile(), resource, AMOUNT);
+                }
+                case CITY -> {
+                    final int AMOUNT = 2;
+                    if (boardStockpile.getResourceCount(resource) < AMOUNT) continue;
+
+                    transferResources(boardStockpile, structure.getOwner().getStockpile(), resource, AMOUNT);
+                }
+            }
+        }
+    }
     
     public void transferResources(Stockpile giver, Stockpile receiver, ResourceType resource, int amount) {
         giver.remove(resource, amount);
         receiver.add(resource, amount);
     }
     // endregion
+
+    public boolean moveRobber(Location location) {
+        if (location.equals(robberLocation)) return false;
+
+        robberLocation = location;
+        return true;
+    }
 
     // region Initialization
     private void initializeBoard() {
