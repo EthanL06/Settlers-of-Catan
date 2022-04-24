@@ -18,10 +18,11 @@ public class Board {
     private static Tile[][] board;
     private static HashMap<Integer, Vertex> vertices = new HashMap<>(); // key: vertex id, value: vertex
     private static HashMap<Integer, Edge> edges = new HashMap<>(); // key: edge id, value: edge
+    private static ArrayList<Harbor> harbors = new ArrayList<>();
 
     private HashMap<Location, Tile> tileLocations;
     private HashMap<Integer, ArrayList<Tile>> resourceTiles; // key: tile number, value: list of tiles
-    private Location robberLocation;
+    private Location robberLocation; // location of tile with robber
 
     private final Stockpile boardStockpile;
     private Stack<DevelopmentCard> developmentCards;
@@ -49,10 +50,13 @@ public class Board {
 
         if (availableSettlementPlacements(GameState.gameStart).contains(vertex)) {
             System.out.println("Player placed a settlement");
+
             Structure structure = new Structure(location, GameState.getCurrentPlayer());
-            GameState.getCurrentPlayer().addStructure(structure);
+
             tile.getVertex(location.getOrientation()).setStructure(structure);
             structure.setVertex(tile.getVertex(location.getOrientation()));
+
+            GameState.getCurrentPlayer().addStructure(structure);
 
             System.out.println("Current tile vertices: " + Arrays.toString(tile.getVertices()));
             Tile[] adjacentTiles = tile.getAdjacentTiles();
@@ -305,13 +309,9 @@ public class Board {
             }
         }
     }
-    
-    public void transferResources(Stockpile giver, Stockpile receiver, ResourceType resource, int amount) {
-        giver.remove(resource, amount);
-        receiver.add(resource, amount);
-    }
     // endregion
 
+    // region Robbing
     public boolean moveRobber(Location location) {
         if (location.equals(robberLocation)) return false;
 
@@ -355,6 +355,20 @@ public class Board {
 
         transferResources(playerStockpile, currentPlayerStockpile, randomResource, 1);
     }
+    // endregion
+
+    // region Trading
+    public void availableHarbors(Player player) {
+
+    }
+
+    public void transferResources(Stockpile giver, Stockpile receiver, ResourceType resource, int amount) {
+        giver.remove(resource, amount);
+        receiver.add(resource, amount);
+    }
+
+
+    // endregion
 
     // region Initialization
     private void initializeBoard() {
@@ -366,21 +380,8 @@ public class Board {
         board[3] = new Tile[4];
         board[4] = new Tile[3];
 
-//        for (int i = 0; i < board.length; i++) {
-//            switch (i) {
-//                case 0, 4 -> {
-//                    board[i] = new Tile[3];
-//                }
-//                case 1, 3 -> {
-//                    board[i] = new Tile[4];
-//                }
-//                case 2 -> {
-//                    board[i] = new Tile[5];
-//                }
-//            }
-//        }
-
         setTiles();
+        setHarbors();
         setNumberTokens();
     }
 
@@ -458,6 +459,63 @@ public class Board {
                 board[row][col].setAdjacentEdgesToVertices();
                 board[row][col].setAdjacentVerticesToEdges();
             }
+        }
+    }
+
+    private void setHarbors() {
+        final int MISC_HARBORS = 4;
+
+        for (int i = 0; i < MISC_HARBORS; i++) {
+            harbors.add(new Harbor(ResourceType.MISC));
+        }
+
+        harbors.add(new Harbor(ResourceType.BRICK));
+        harbors.add(new Harbor(ResourceType.ORE));
+        harbors.add(new Harbor(ResourceType.WOOL));
+        harbors.add(new Harbor(ResourceType.WHEAT));
+        harbors.add(new Harbor(ResourceType.WOOD));
+
+        Collections.shuffle(harbors, Dice.getRef());
+
+        Vertex[] vertices;
+        // 0 1
+        vertices = new Vertex[] {board[0][1].getVertex(Vertex.WEST), board[0][1].getVertex(Vertex.NORTHWEST)};
+        harbors.get(0).setVertices(vertices);
+
+        // 0 2
+        vertices = new Vertex[] {board[0][2].getVertex(Vertex.NORTHWEST), board[0][2].getVertex(Vertex.NORTHEAST)};
+        harbors.get(1).setVertices(vertices);
+
+        // 1 3
+        vertices = new Vertex[] {board[1][3].getVertex(Vertex.NORTHEAST), board[1][3].getVertex(Vertex.EAST)};
+        harbors.get(2).setVertices(vertices);
+
+        // 3 3
+        vertices = new Vertex[] {board[3][3].getVertex(Vertex.NORTHEAST), board[3][3].getVertex(Vertex.EAST)};
+        harbors.get(3).setVertices(vertices);
+
+        // 4 2
+        vertices = new Vertex[] {board[4][2].getVertex(Vertex.EAST), board[4][2].getVertex(Vertex.SOUTHEAST)};
+        harbors.get(4).setVertices(vertices);
+
+        // 4 1
+        vertices = new Vertex[] {board[4][1].getVertex(Vertex.SOUTHEAST), board[4][1].getVertex(Vertex.SOUTHWEST)};
+        harbors.get(5).setVertices(vertices);
+
+        // 3 0
+        vertices = new Vertex[] {board[3][0].getVertex(Vertex.SOUTHEAST), board[3][0].getVertex(Vertex.SOUTHWEST)};
+        harbors.get(6).setVertices(vertices);
+
+        // 2 0
+        vertices = new Vertex[] {board[2][0].getVertex(Vertex.SOUTHWEST), board[2][0].getVertex(Vertex.WEST)};
+        harbors.get(7).setVertices(vertices);
+
+        // 1 0
+        vertices = new Vertex[] {board[1][0].getVertex(Vertex.WEST), board[1][0].getVertex(Vertex.NORTHWEST)};
+        harbors.get(8).setVertices(vertices);
+
+        for (Harbor harbor : harbors) {
+            System.out.println(Arrays.toString(harbor.getVertices()));
         }
     }
 
@@ -559,6 +617,10 @@ public class Board {
 
     public static Tile[][] getBoard() {
         return board;
+    }
+
+    public static ArrayList<Harbor> getHarbors() {
+        return harbors;
     }
 
     public static Tile getTile(int row, int col) {

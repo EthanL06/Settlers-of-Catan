@@ -172,7 +172,6 @@ public class GameState {
                 case "stockpile":
                     break;
                 case "harbor":
-                    // TODO: still need to implement harbors
                     break;
             }
 
@@ -225,6 +224,8 @@ public class GameState {
             input = sc.nextLine().split(" ");
             flag = board.placeSettlement(new Location(Integer.parseInt(input[0]), Integer.parseInt(input[1]), Integer.parseInt(input[2])));
         }
+
+        System.out.println("Available harbors: " + currentPlayer.getHarbors());
     }
 
     public void placeRoad() {

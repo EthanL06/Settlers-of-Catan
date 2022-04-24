@@ -4,6 +4,7 @@ import engine.buildings.Road;
 import engine.buildings.Structure;
 import engine.cards.DevelopmentCard;
 import engine.enums.Color;
+import engine.helper.Vertex;
 
 import java.util.ArrayList;
 
@@ -46,6 +47,20 @@ public class Player {
 
     public void addStructure(Structure structure) {
         structures.add(structure);
+
+        // Update harbors player can trade with
+        outer:
+        for (Harbor harbor : Board.getHarbors()) {
+
+            for (Vertex harborVertex : harbor.getVertices()) {
+                if (harborVertex.equals(structure.getVertex())) {
+                    System.out.println("HERE!!!");
+                    harbors.add(harbor);
+                    break outer;
+                }
+            }
+
+        }
     }
 
     public void addRoad(Road road) {
@@ -58,6 +73,10 @@ public class Player {
 
     public ArrayList<Road> getRoads() {
         return roads;
+    }
+
+    public ArrayList<Harbor> getHarbors() {
+        return harbors;
     }
 
     public Stockpile getStockpile() {
