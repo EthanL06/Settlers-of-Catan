@@ -4,6 +4,7 @@ import engine.buildings.Road;
 import engine.buildings.Structure;
 import engine.cards.DevelopmentCard;
 import engine.enums.Color;
+import engine.helper.Edge;
 import engine.helper.Vertex;
 
 import java.util.ArrayList;
@@ -19,7 +20,6 @@ public class Player {
     private ArrayList<Structure> structures;
     private ArrayList<Road> roads;
 
-    private ArrayList<Tile> tiles;
     private ArrayList<Harbor> harbors;
 
     private int numOfKnights;
@@ -35,7 +35,6 @@ public class Player {
         structures = new ArrayList<>();
         roads = new ArrayList<>();
 
-        tiles = new ArrayList<>();
         harbors = new ArrayList<>();
 
         numOfKnights = 0;
@@ -63,7 +62,40 @@ public class Player {
 
     public void addRoad(Road road) {
         roads.add(road);
+
+        lengthOfLongestRoad = updateLongestRoad();
     }
+
+    public void addDevelopmentCard(DevelopmentCard card) {
+        developmentCards.add(card);
+    }
+
+    public void useDevelopmentCard() {
+        // TODO: need to implement
+    }
+
+    // TODO: complete this!!
+    public int updateLongestRoad() {
+        // TODO: need to account that other players can cut length of road with settlements and cities
+
+
+        for (Road road: roads) {
+            Edge edge = road.getEdge();
+            Vertex[] adjacentVertices = edge.getAdjacentVertices();
+
+            for (Vertex vertex: adjacentVertices) {
+                // account for players cutting length of longest road
+                if (!vertex.getStructure().getOwner().equals(this)) {
+                    continue;
+                }
+
+            }
+        }
+
+        return -1;
+    }
+
+
 
     public ArrayList<Structure> getStructures() {
         return structures;
@@ -75,6 +107,10 @@ public class Player {
 
     public ArrayList<Harbor> getHarbors() {
         return harbors;
+    }
+
+    public ArrayList<DevelopmentCard> getDevelopmentCards() {
+        return developmentCards;
     }
 
     public Stockpile getStockpile() {

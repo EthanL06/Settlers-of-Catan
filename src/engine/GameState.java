@@ -1,5 +1,6 @@
 package engine;
 
+import engine.cards.DevelopmentCard;
 import engine.enums.Color;
 import engine.enums.ResourceType;
 import engine.helper.Location;
@@ -125,6 +126,7 @@ public class GameState {
                 final int AMOUNT_TO_DISCARD = player.getStockpile().getTotal() / 2;
 
                 // TODO: implement way for each player to choose which resources to discard
+                System.out.println("PLAYER " + player.getId() + "");
             }
         }
     }
@@ -169,6 +171,7 @@ public class GameState {
     // TODO: complete this first
     public void tradePhase() {
         System.out.println("Start of the trade phase");
+        System.out.println("Enter next action: ");
         String input = sc.nextLine();
 
         while (!input.equalsIgnoreCase("stop")) {
@@ -414,20 +417,96 @@ public class GameState {
     // region Buy Phase
 
     public void buyPhase() {
+        System.out.println("Start of the trade phase");
+        System.out.println("Enter next action: ");
         String input = sc.nextLine();
 
         while (!input.equalsIgnoreCase("stop")) {
             switch (input.toLowerCase(Locale.ROOT)) {
                 case "road":
+                    buyRoad();
                     break;
                 case "settlement":
+                    buySettlement();
                     break;
                 case "city":
+                    buyCity();
                     break;
                 case "development":
+                    buyDevelopmentCard();
                     break;
             }
+
+            System.out.println("Enter next action: ");
+            input = sc.nextLine();
         }
+    }
+
+    public void buyRoad() {
+        Stockpile playerStockpile = currentPlayer.getStockpile();
+
+        if (playerStockpile.getResourceCount(ResourceType.BRICK) < 1 || playerStockpile.getResourceCount(ResourceType.WOOD) < 1) {
+            System.out.println("Not enough resources to buy road");
+            return;
+        }
+
+        playerStockpile.remove(ResourceType.BRICK, 1);
+        playerStockpile.remove(ResourceType.WOOD, 1);
+
+        placeRoad();
+    }
+
+    public void buySettlement() {
+        Stockpile playerStockpile = currentPlayer.getStockpile();
+
+        if (playerStockpile.getResourceCount(ResourceType.BRICK) < 1 || playerStockpile.getResourceCount(ResourceType.WOOL) < 1 ||
+                playerStockpile.getResourceCount(ResourceType.WOOD) < 1 || playerStockpile.getResourceCount(ResourceType.WHEAT) < 1) {
+            System.out.println("Not enough resources to buy settlement");
+            return;
+        }
+
+        playerStockpile.remove(ResourceType.BRICK, 1);
+        playerStockpile.remove(ResourceType.WOOL, 1);
+        playerStockpile.remove(ResourceType.WOOD, 1);
+        playerStockpile.remove(ResourceType.WHEAT, 1);
+
+        placeSettlement();
+    }
+
+    public void buyCity() {
+        Stockpile playerStockpile = currentPlayer.getStockpile();
+
+        if (playerStockpile.getResourceCount(ResourceType.ORE) < 3 || playerStockpile.getResourceCount(ResourceType.WHEAT) < 2) {
+            System.out.println("Not enough resources to buy city");
+            return;
+        }
+
+        playerStockpile.remove(ResourceType.ORE, 3);
+        playerStockpile.remove(ResourceType.WHEAT, 2);
+
+        upgradeToCity();
+    }
+
+    public void buyDevelopmentCard() {
+        Stockpile playerStockpile = currentPlayer.getStockpile();
+
+        if (playerStockpile.getResourceCount(ResourceType.ORE) < 1 || playerStockpile.getResourceCount(ResourceType.WHEAT) < 1 || playerStockpile.getResourceCount(ResourceType.WOOL) < 1) {
+            System.out.println("Not enough resources to buy development card");
+            return;
+        }
+
+        DevelopmentCard drawnCard = board.drawDevelopmentCard();
+
+        if (drawnCard == null) {
+            System.out.println("No more development cards left");
+            return;
+        }
+
+        playerStockpile.remove(ResourceType.ORE, 1);
+        playerStockpile.remove(ResourceType.WHEAT, 1);
+        playerStockpile.remove(ResourceType.WOOL, 1);
+
+        currentPlayer.addDevelopmentCard(drawnCard);
     }
     // endregion
 
@@ -474,6 +553,21 @@ public class GameState {
             System.out.println("Invalid road placement, try again: ");
             input = sc.nextLine().split(" ");
             flag = board.placeRoad(new Location(Integer.parseInt(input[0]), Integer.parseInt(input[1]), Integer.parseInt(input[2])));
+        }
+    }
+
+    public void upgradeToCity() {
+        System.out.println("Available settlements to upgrade: " + board.availableSettlementToCityUpgrades());
+        System.out.println("Enter location to upgrade settlement to city: ");
+        String[] input = sc.nextLine().split(" ");
+
+        boolean flag = board.upgradeSettlementToCity(new Location(Integer.parseInt(input[0]), Integer.parseInt(input[1]), Integer.parseInt(input[2])));
+
+        while (!flag) {
+            System.out.println("Available settlements to upgrade: " + board.availableSettlementToCityUpgrades());
+            System.out.println("Invalid settlement upgrade, try again: ");
+            input = sc.nextLine().split(" ");
+            flag = board.upgradeSettlementToCity(new Location(Integer.parseInt(input[0]), Integer.parseInt(input[1]), Integer.parseInt(input[2])));
         }
     }
     // endregion

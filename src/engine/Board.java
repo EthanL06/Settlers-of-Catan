@@ -5,6 +5,7 @@ import engine.buildings.Structure;
 import engine.cards.DevelopmentCard;
 import engine.enums.DevelopmentCardType;
 import engine.enums.ResourceType;
+import engine.enums.StructureType;
 import engine.helper.Edge;
 import engine.helper.Location;
 import engine.helper.Vertex;
@@ -24,7 +25,6 @@ public class Board {
     private HashMap<Location, Tile> tileLocations;
     private HashMap<Integer, ArrayList<Tile>> resourceTiles; // key: tile number, value: list of tiles
     private Location robberLocation; // location of tile with robber
-
 
     private Stack<DevelopmentCard> developmentCards;
 
@@ -116,6 +116,24 @@ public class Board {
             System.out.println("Invalid location");
             return false;
         }
+    }
+
+    public boolean upgradeSettlementToCity(Location location) {
+        Tile tile = getTile(location);
+
+        if (tile == null) {
+            System.out.println("Invalid location");
+            return false;
+        }
+
+        Vertex selectedVertex = tile.getVertex(location.getOrientation());
+
+        if (availableSettlementToCityUpgrades().contains(selectedVertex)) {
+            selectedVertex.getStructure().upgradeToCity();
+            System.out.println("Player upgraded a settlement to a city");
+        }
+
+        return true;
     }
 
     public Set<Edge> availableRoadPlacements() {
@@ -228,7 +246,22 @@ public class Board {
         return availableVertices;
     }
 
+    public HashSet<Vertex> availableSettlementToCityUpgrades() {
+        Player currentPlayer = GameState.getCurrentPlayer();
+        HashSet<Vertex> availableVertices = new HashSet<>();
 
+        for (Structure structure: currentPlayer.getStructures()) {
+            if (structure.getType() == StructureType.SETTLEMENT) {
+                availableVertices.add(structure.getVertex());
+            }
+        }
+
+        return availableVertices;
+    }
+
+    public DevelopmentCard drawDevelopmentCard() {
+        return developmentCards.pop();
+    }
 
     // endregion
 
@@ -359,10 +392,6 @@ public class Board {
     // endregion
 
     // region Trading
-    public void availableHarbors(Player player) {
-
-    }
-
     public void transferResources(Stockpile giver, Stockpile receiver, ResourceType resource, int amount) {
         giver.remove(resource, amount);
         receiver.add(resource, amount);

@@ -23,6 +23,10 @@ public class Structure {
         this(null, location, owner);
     }
 
+    public void upgradeToCity() {
+        this.type = StructureType.CITY;
+    }
+
     public void setVertex(Vertex vertex) {
         this.vertex = vertex;
     }
