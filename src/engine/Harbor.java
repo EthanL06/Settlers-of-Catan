@@ -47,6 +47,6 @@ public class Harbor {
 
     @Override
     public String toString() {
-        return "Harbor " + id + ": " + resourceType + " " + ratio;
+        return "Harbor " + id + ": " + resourceType;
     }
 }

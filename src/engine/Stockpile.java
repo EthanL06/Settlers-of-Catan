@@ -41,6 +41,14 @@ public class Stockpile {
             case WOOL -> this.wool += count;
         }
     }
+
+    public void add(Stockpile stockpile) {
+        this.bricks += stockpile.bricks;
+        this.wheat += stockpile.wheat;
+        this.wood += stockpile.wood;
+        this.ore += stockpile.ore;
+        this.wool += stockpile.wool;
+    }
     // endregion
 
     // region Remove Resources
@@ -62,6 +70,14 @@ public class Stockpile {
             case ORE -> this.ore -= count;
             case WOOL -> this.wool -= count;
         }
+    }
+
+    public void remove(Stockpile stockpile) {
+        this.bricks -= stockpile.bricks;
+        this.wheat -= stockpile.wheat;
+        this.wood -= stockpile.wood;
+        this.ore -= stockpile.ore;
+        this.wool -= stockpile.wool;
     }
     // endregion
 
@@ -94,7 +110,7 @@ public class Stockpile {
     // endregion
 
     public String toString() {
-        return "Stockpile: B-" + this.bricks + " W-" + this.wheat + " WO-" + this.wood + " O-" + this.ore + " WOOL-" + this.wool;
+        return "Stockpile: BRICK-" + this.bricks + "\nWHEAT-" + this.wheat + "\nWOOD-" + this.wood + "\nORE-" + this.ore + "WOOL-" + this.wool;
     }
 }
 

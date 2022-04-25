@@ -191,13 +191,14 @@ public class Tile {
     }
 
     private void setAdjacentVertex(int vertexOrientation) {
-        if (vertices[vertexOrientation] != null) {
+        if (vertices[vertexOrientation] != null) { // if vertex already exists
             return;
         }
 
         Tile adjacentTileOne = null;
         Tile adjacentTileTwo = null;
 
+        // finding the two adjacent tiles that share the same vertex given the vertex orientation
         switch (vertexOrientation) {
             case Vertex.NORTHWEST -> {
                 adjacentTileOne = adjacentTiles[NORTHWEST];
@@ -228,11 +229,12 @@ public class Tile {
         boolean tileOneExists = adjacentTileOne != null;
         boolean tileTwoExists = adjacentTileTwo != null;
 
-        boolean vertexExists = false;
+        boolean vertexExists = false; // flag if the vertex has already been initialized
 
         int tileOneVertexOrientation = -1;
         int tileTwoVertexOrientation = -1;
 
+        // finding the corresponding vertex orientation for the two adjacent tiles in relation to the current tile's vertex orientation
         switch (vertexOrientation) {
             case Vertex.NORTHWEST -> {
                 tileOneVertexOrientation = Vertex.EAST;
@@ -260,16 +262,16 @@ public class Tile {
             }
         }
 
-        // If NW tile exists
+        // if the one of the two adjacent tiles exists, we check if the corresponding vertex in the adjacent tile already exists
+        // if the corresponding vertex does not exist, we create it
         if (tileOneExists) {
-//            Vertex temp = adjacentTileOne.getVertex(Vertex.EAST);
-            Vertex temp = adjacentTileOne.getVertex(tileOneVertexOrientation);
+            Vertex temp = adjacentTileOne.getVertex(tileOneVertexOrientation); // get the adjacent tile's vertex with the corresponding orientation
 
-            // If NW tile has a vertex at position EAST
+            // if the adjacent tile's vertex exists
             if (temp != null) {
-                vertices[vertexOrientation] = temp;
+                vertices[vertexOrientation] = temp; // set this tile's vertex to the adjacent tile's vertex
 
-                // Set pointer to same vertex in N tile at position SW
+                // set the same vertex reference to the other adjacent tile
                 if (tileTwoExists) {
                     adjacentTileTwo.setVertex(temp, tileTwoVertexOrientation);
                 }
@@ -278,23 +280,24 @@ public class Tile {
             }
         }
 
-        // If N exists
         if (tileTwoExists && !vertexExists) {
             Vertex temp = adjacentTileTwo.getVertex(tileTwoVertexOrientation);
 
             if (temp != null) {
                 vertices[vertexOrientation] = temp;
 
-                // Set pointer to same vertex in NW tile at position E
+                // set the same vertex reference to the other adjacent tile
                 if (tileOneExists) {
                     adjacentTileOne.setVertex(temp, tileOneVertexOrientation);
                 }
 
                 vertexExists = true;
             }
-
         }
 
+        // we have checked the two adjacent tiles and found no corresponding vertex that exists
+        // create a new vertex and set it in the tile and the two adjacent tiles
+        // all three tiles will store the same vertex reference
         if (!vertexExists) {
             Vertex v = new Vertex();
             Board.addVertex(v);

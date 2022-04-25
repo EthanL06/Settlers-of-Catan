@@ -19,19 +19,18 @@ public class Board {
     private static HashMap<Integer, Vertex> vertices = new HashMap<>(); // key: vertex id, value: vertex
     private static HashMap<Integer, Edge> edges = new HashMap<>(); // key: edge id, value: edge
     private static ArrayList<Harbor> harbors = new ArrayList<>();
+    private static Stockpile boardStockpile = new Stockpile(19, 19, 19, 19, 19);
 
     private HashMap<Location, Tile> tileLocations;
     private HashMap<Integer, ArrayList<Tile>> resourceTiles; // key: tile number, value: list of tiles
     private Location robberLocation; // location of tile with robber
 
-    private final Stockpile boardStockpile;
+
     private Stack<DevelopmentCard> developmentCards;
 
     public Board() {
         initializeBoard();
         initializeDevelopmentCards();
-
-        boardStockpile = new Stockpile(19, 19, 19, 19, 19);
 
         System.out.println(this);
     }
@@ -48,7 +47,7 @@ public class Board {
 
         Vertex vertex = tile.getVertex(location.getOrientation());
 
-        if (availableSettlementPlacements(GameState.gameStart).contains(vertex)) {
+        if (availableSettlementPlacements(GameState.isGameStart).contains(vertex)) {
             System.out.println("Player placed a settlement");
 
             Structure structure = new Structure(location, GameState.getCurrentPlayer());
@@ -335,6 +334,8 @@ public class Board {
             }
         }
 
+        availablePlayers.remove(GameState.getCurrentPlayer());
+
         return availablePlayers;
     }
 
@@ -365,6 +366,15 @@ public class Board {
     public void transferResources(Stockpile giver, Stockpile receiver, ResourceType resource, int amount) {
         giver.remove(resource, amount);
         receiver.add(resource, amount);
+    }
+
+    // for bulk trades
+    public void transferResources(Stockpile traderOne, Stockpile traderTwo, Stockpile traderOneTradingResources, Stockpile traderTwoTradingResources) {
+        traderOne.remove(traderOneTradingResources);
+        traderTwo.remove(traderTwoTradingResources);
+
+        traderOne.add(traderTwoTradingResources);
+        traderTwo.add(traderOneTradingResources);
     }
 
 
@@ -633,6 +643,10 @@ public class Board {
         }
 
         return board[l.getRow()][l.getCol()];
+    }
+
+    public static Stockpile getStockpile() {
+        return boardStockpile;
     }
     // endregion
 

@@ -8,7 +8,9 @@ import java.util.*;
 
 public class GameState {
 
-    public static boolean gameStart = true;
+    // TODO: allow player to play development card anytime through their turn
+
+    public static boolean isGameStart = true;
 
     private static Player currentPlayer = null;
     private static int currentPlayerIndex = 0;
@@ -42,6 +44,7 @@ public class GameState {
     }
 
     public static void nextTurn() {
+        // TODO: check win condition
         currentPlayerIndex++;
 
         if (currentPlayerIndex >= players.length)
@@ -49,6 +52,8 @@ public class GameState {
 
         currentPlayer = players[currentPlayerIndex];
         System.out.println("Next turn: " + currentPlayer);
+
+        // TODO: player rolls dice
     }
 
     // region Setup Phase
@@ -71,7 +76,7 @@ public class GameState {
             nextTurn();
         }
 
-        gameStart = false;
+        isGameStart = false;
     }
 
     private void initializePlayers(int numPlayers) {
@@ -163,20 +168,246 @@ public class GameState {
     // region Trade Phase
     // TODO: complete this first
     public void tradePhase() {
+        System.out.println("Start of the trade phase");
         String input = sc.nextLine();
 
         while (!input.equalsIgnoreCase("stop")) {
             switch (input.toLowerCase(Locale.ROOT)) {
-                case "domestic":
-                    break;
-                case "stockpile":
-                    break;
-                case "harbor":
-                    break;
+                case "domestic" -> // TODO: need to test
+                        domesticTrade();
+                case "stockpile" -> // TODO: need to test
+                        stockpileTrade();
+                case "harbor" -> // TODO: need to test
+                        harborTrade();
             }
 
+            System.out.println("Enter next action: ");
             input = sc.nextLine();
         }
+    }
+
+    // TODO: must trade resource cards of different types
+    public void domesticTrade() {
+        System.out.println("Enter player number to trade with: ");
+
+        int playerNum = sc.nextInt();
+        Player traderOne = currentPlayer;
+        Player traderTwo = null;
+
+        if (playerNum > players.length || playerNum < 1 || playerNum == currentPlayer.getId()) {
+            System.out.println("Invalid player number.");
+            return;
+        }
+
+        for (Player player: players) {
+            if (player.getId() == playerNum) {
+                traderTwo = player;
+                break;
+            }
+        }
+
+        System.out.println("+=-=-=-Domestic Trade-=-=-=+");
+        System.out.println("Enter amount of resources in order of: brick, wool, ore, wheat, and wood (separated by spaces)");
+        System.out.println();
+        System.out.println("PLAYER " + traderOne.getId() + "'s " + traderOne.getStockpile());
+        System.out.println("PLAYER " + traderOne.getId() + ", enter resources to trade");
+
+        String[] input = sc.nextLine().split(" ");
+        Stockpile traderOneTradingResources = new Stockpile();
+
+        traderOneTradingResources.add(ResourceType.BRICK, Integer.parseInt(input[0]));
+        traderOneTradingResources.add(ResourceType.WOOL, Integer.parseInt(input[1]));
+        traderOneTradingResources.add(ResourceType.ORE, Integer.parseInt(input[2]));
+        traderOneTradingResources.add(ResourceType.WHEAT, Integer.parseInt(input[3]));
+        traderOneTradingResources.add(ResourceType.WOOD, Integer.parseInt(input[4]));
+
+        if (!verifyTrade(traderOne.getStockpile(), traderOneTradingResources)) {
+            System.out.println("Invalid trade. Terminated domestic trade");
+            System.out.println("+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=+");
+            return;
+        }
+
+        System.out.println("PLAYER " + traderTwo.getId() + "'s " + traderTwo.getStockpile());
+        System.out.println("PLAYER " + traderTwo.getId() + ", enter resources to trade");
+
+        input = sc.nextLine().split(" ");
+        Stockpile traderTwoTradingResources = new Stockpile();
+
+        traderTwoTradingResources.add(ResourceType.BRICK, Integer.parseInt(input[0]));
+        traderTwoTradingResources.add(ResourceType.WOOL, Integer.parseInt(input[1]));
+        traderTwoTradingResources.add(ResourceType.ORE, Integer.parseInt(input[2]));
+        traderTwoTradingResources.add(ResourceType.WHEAT, Integer.parseInt(input[3]));
+        traderTwoTradingResources.add(ResourceType.WOOD, Integer.parseInt(input[4]));
+
+        if (!verifyTrade(traderOne.getStockpile(), traderTwoTradingResources)) {
+            System.out.println("Invalid trade. Terminated domestic trade");
+            System.out.println("+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=+");
+            return;
+        }
+
+        System.out.println("Player " + traderOne.getId() + "'s trade:\n" + traderOneTradingResources);
+        System.out.println("Player " + traderTwo.getId() + "'s trade:\n" + traderTwoTradingResources);
+
+        System.out.println("\nCONFIRM TRADE? (y/n)");
+
+        if (!sc.nextLine().equalsIgnoreCase("y")) {
+            System.out.println("Trade cancelled.");
+            System.out.println("+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=+");
+            return;
+        }
+
+        board.transferResources(traderOne.getStockpile(), traderTwo.getStockpile(), traderOneTradingResources, traderTwoTradingResources);
+
+        System.out.println("TRADE ACCEPTED");
+        System.out.println("+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=+");
+    }
+
+    public void stockpileTrade() {
+        System.out.println("+=-=-=-Stockpile Trade-=-=-=+");
+        System.out.println("4 identical resources for 1 different resource");
+
+        System.out.println("Enter which resource you would like to trade:");
+        String resourceInput = sc.nextLine();
+        ResourceType tradingResource = null;
+        ResourceType receivingResource = null;
+
+        try {
+            tradingResource = ResourceType.valueOf(resourceInput.toUpperCase());
+
+            if (currentPlayer.getStockpile().getResourceCount(tradingResource) < 4) {
+                System.out.println("You do not have enough of that resource to trade.");
+                System.out.println("+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=+");
+                return;
+            }
+
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid resource. Terminated stockpile trade");
+            System.out.println("+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=+");
+            return;
+        }
+
+        System.out.println("\nEnter which resource you would like to trade for:");
+
+        try {
+            receivingResource = ResourceType.valueOf(sc.nextLine().toUpperCase());
+
+            if (receivingResource == tradingResource) {
+                throw new IllegalArgumentException();
+            }
+
+            if (Board.getStockpile().getResourceCount(receivingResource) < 1) {
+                System.out.println("Board does not have enough resources to trade for that resource.");
+                System.out.println("+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=+");
+                return;
+            }
+
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid resource. Terminated stockpile trade");
+            System.out.println("+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=+");
+        }
+
+        // Give board 4 of the trading resource
+        board.transferResources(currentPlayer.getStockpile(), Board.getStockpile(), tradingResource, 4);
+
+        // Give current player 1 of the receiving resource
+        board.transferResources(Board.getStockpile(), currentPlayer.getStockpile(), receivingResource, 1);
+
+        System.out.println("TRADE ACCEPTED");
+        System.out.println("+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=+");
+    }
+
+    public void harborTrade() {
+        ArrayList<Harbor> availableHarbors = currentPlayer.getHarbors();
+
+        if (availableHarbors.size() == 0) {
+            System.out.println("You do not have any harbors to trade with.");
+            return;
+        }
+
+        System.out.println("+=-=-=-Harbor Trade-=-=-=+");
+        System.out.println("Available harbors: " + availableHarbors);
+
+        System.out.println("\nEnter harbor number to trade with: ");
+        int harborInput = sc.nextInt();
+        sc.nextLine();
+
+        Harbor harbor = null;
+        for (Harbor h : availableHarbors) {
+            if (h.getId() == harborInput) {
+                harbor = h;
+                break;
+            }
+        }
+
+        if (harbor == null) {
+            System.out.println("Invalid harbor number. Terminated harbor trade");
+            System.out.println("+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=+");
+            return;
+        }
+
+        System.out.println("Harbor ratio: " + harbor.getRatio() + ":1");
+        System.out.println("Harbor resource: " + harbor.getResourceType());
+
+        ResourceType tradingResource;
+        ResourceType receivingResource;
+
+        // Determine what resource the player wants to trade
+        if (harbor.getResourceType() != ResourceType.MISC) {
+            tradingResource = harbor.getResourceType();
+        } else {
+            System.out.println("Enter resource to trade: ");
+
+            try {
+                tradingResource = ResourceType.valueOf(sc.nextLine().toUpperCase());
+
+                if (currentPlayer.getStockpile().getResourceCount(tradingResource) < 1) {
+                    System.out.println("Not enough resources to trade");
+                    System.out.println("+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=+");
+                    return;
+                }
+
+
+            } catch (IllegalArgumentException e) {
+                System.out.println("Invalid resource. Terminated harbor trade");
+                System.out.println("+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=+");
+                return;
+            }
+        }
+
+        // Determine what resource the player wants to receive
+        System.out.println("Enter resource to receive: ");
+
+        try {
+            receivingResource = ResourceType.valueOf(sc.nextLine().toUpperCase());
+
+            if (Board.getStockpile().getResourceCount(receivingResource) < 1) {
+                System.out.println("Not enough resources to trade");
+                System.out.println("+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=+");
+                return;
+            }
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid resource. Terminated harbor trade");
+            System.out.println("+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=+");
+            return;
+        }
+
+        // Transfer resources from player to board
+        board.transferResources(currentPlayer.getStockpile(), Board.getStockpile(), tradingResource, harbor.getRatio());
+
+        // Transfer resources from board to player
+        board.transferResources(Board.getStockpile(), currentPlayer.getStockpile(), receivingResource, 1);
+
+        System.out.println("TRADE ACCEPTED");
+        System.out.println("+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=+");
+    }
+
+    // verify that trader has sufficient resources
+    public boolean verifyTrade(Stockpile traderStockpile, Stockpile tradingResources) {
+        return traderStockpile.getResourceCount(ResourceType.BRICK) >= tradingResources.getResourceCount(ResourceType.BRICK) &&
+                traderStockpile.getResourceCount(ResourceType.WOOL) >= tradingResources.getResourceCount(ResourceType.WOOL) &&
+                traderStockpile.getResourceCount(ResourceType.ORE) >= tradingResources.getResourceCount(ResourceType.ORE) &&
+                traderStockpile.getResourceCount(ResourceType.WHEAT) >= tradingResources.getResourceCount(ResourceType.WHEAT) &&
+                traderStockpile.getResourceCount(ResourceType.WOOD) >= tradingResources.getResourceCount(ResourceType.WOOD);
     }
     // endregion
 
@@ -209,7 +440,7 @@ public class GameState {
 
     // region Place settlements/roads
     public void placeSettlement() {
-        System.out.println("Available settlement placements: " + board.availableSettlementPlacements(gameStart));
+        System.out.println("Available settlement placements: " + board.availableSettlementPlacements(isGameStart));
         System.out.println("Enter location to place settlement: ");
         String[] input = sc.nextLine().split(" ");
 
@@ -219,7 +450,7 @@ public class GameState {
         boolean flag = board.placeSettlement(new Location(Integer.parseInt(input[0]), Integer.parseInt(input[1]), Integer.parseInt(input[2])));
 
         while (!flag) {
-            System.out.println("Available settlement placements: " + board.availableSettlementPlacements(gameStart));
+            System.out.println("Available settlement placements: " + board.availableSettlementPlacements(isGameStart));
             System.out.println("Invalid settlement placement, try again: ");
             input = sc.nextLine().split(" ");
             flag = board.placeSettlement(new Location(Integer.parseInt(input[0]), Integer.parseInt(input[1]), Integer.parseInt(input[2])));

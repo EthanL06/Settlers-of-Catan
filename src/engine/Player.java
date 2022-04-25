@@ -27,7 +27,7 @@ public class Player {
     private int victoryPoints;
 
     public Player(Color color) {
-        this.id = number;
+        this.id = number++;
         this.color = color;
         stockpile = new Stockpile();
 
@@ -41,10 +41,9 @@ public class Player {
         numOfKnights = 0;
         lengthOfLongestRoad = 0;
         victoryPoints = 0;
-
-        number++;
     }
 
+    // TODO: remember to add victory points
     public void addStructure(Structure structure) {
         structures.add(structure);
 
@@ -59,7 +58,6 @@ public class Player {
                     break outer;
                 }
             }
-
         }
     }
 
