@@ -8,6 +8,7 @@ import engine.helper.Edge;
 import engine.helper.Vertex;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -74,80 +75,69 @@ public class Player {
         // TODO: need to implement
     }
 
-    // TODO: complete this!!
-    public void updateLongestRoad() {
-        // TODO: need to account that other players can cut length of road with settlements and cities
-        int longestRoad = 0;
-
-        for (Road road: roads) {
-            longestRoad = Math.max(longestRoad, longestRoad(road, new HashSet<>()));
-        }
-
-        lengthOfLongestRoad = longestRoad;
-    }
-
-/*    private int longestRoad(Road road, HashSet<Road> roadsVisited) {
-        if (roadsVisited.contains(road)) {
-            return 0;
-        }
-
-        roadsVisited.add(road);
-
-        Edge edge = road.getEdge();
-        Vertex[] adjacentVertices = edge.getAdjacentVertices();
-        ArrayList<Vertex> availableVertices = new ArrayList<>();
-
-        for (Vertex adjacentVertex : adjacentVertices) {
-            // if adjacent vertex doesn't contain a structure or it contains a structure owned by this player
-            if (adjacentVertex.getStructure() == null || adjacentVertex.getStructure().getOwner().equals(this)) {
-                availableVertices.add(adjacentVertex);
-            }
-        }
+    // look at bug on figma
+    public int longestRoad() {
+        ArrayList<Edge> endpointEdges = getEndpointEdges();
 
         int longestRoad = 0;
-        for (Vertex vertex: availableVertices) {
-            for (Edge adjacentEdge: vertex.getAdjacentEdges()) {
-                // check if the adjacent edge is not the same as the  given edge AND there is a road in the adjacent edge AND the road is owned by this player
-                if (adjacentEdge != null && !roadsVisited.contains(adjacentEdge.getRoad()) && !adjacentEdge.equals(edge) && adjacentEdge.getRoad() != null && adjacentEdge.getRoad().getOwner().equals(this)) {
-                    longestRoad = Math.max(longestRoad, longestRoad(adjacentEdge.getRoad(), roadsVisited));
-                    System.out.println("LONGEST SO FAR: " + longestRoad);
+
+        for (Edge edge: endpointEdges) {
+            Vertex[] adjacentVertices = edge.getAdjacentVertices();
+
+            for (Vertex vertex: adjacentVertices) {
+                Edge[] adjacentEdges = vertex.getAdjacentEdges();
+
+                for (Edge adjacentEdge: adjacentEdges) {
+                    longestRoad = Math.max(longestRoad, longestRoad(vertex, adjacentEdge, new HashSet<>()));
                 }
             }
         }
 
-        return 1 + longestRoad;
-    }*/
+        return longestRoad;
+    }
 
-    private int longestRoad(Road road, HashSet<Road> roadsVisited) {
-        if (roadsVisited.contains(road)) {
-            return 0;
-        }
+    private int longestRoad(Vertex startingVertex, Edge edge, HashSet<Road> roadsVisited) {
+        if (edge == null || edge.getRoad() == null || roadsVisited.contains(edge.getRoad()) || !edge.getRoad().getOwner().equals(this)) return 0;
 
-        int longestRoad = 0;
+        roadsVisited.add(edge.getRoad());
 
-        roadsVisited.add(road);
+        Vertex otherVertex = edge.getAdjacentVertices()[0].equals(startingVertex) ? edge.getAdjacentVertices()[1] : edge.getAdjacentVertices()[0];
 
-        Edge edge = road.getEdge();
-        Vertex[] adjacentVertices = edge.getAdjacentVertices();
+        HashSet<Road> roadsVisitedCopy = new HashSet<>(roadsVisited);
+        HashSet<Road> roadsVisitedCopy2 = new HashSet<>(roadsVisited);
 
-        for (Vertex vertex: adjacentVertices) {
-            if (vertex.getStructure() == null || vertex.getStructure().getOwner().equals(this)) {
-                Edge[] adjacentEdges = vertex.getAdjacentEdges();
-                ArrayList<Edge> availableEdges = new ArrayList<>();
+        return 1 + Math.max(longestRoad(otherVertex, otherVertex.getAdjacentEdges()[0], roadsVisitedCopy), longestRoad(otherVertex, otherVertex.getAdjacentEdges()[1], roadsVisitedCopy2));
+    }
 
-                for (Edge adjacentEdge : adjacentEdges) {
-                    if (adjacentEdge != null && adjacentEdge.getRoad() != null && adjacentEdge.getRoad().getOwner().equals(this)) {
-                        availableEdges.add(adjacentEdge);
+    private ArrayList<Edge> getEndpointEdges() {
+        ArrayList<Edge> endpointEdges = new ArrayList<>();
+
+        for (Road road: roads) {
+            Edge edge = road.getEdge();
+            Vertex[] adjacentVertices = edge.getAdjacentVertices();
+
+            for (Vertex vertex: adjacentVertices) {
+                Edge[] vertexEdges = vertex.getAdjacentEdges();
+                ArrayList<Edge> otherEdges = new ArrayList<>();
+
+                for (Edge vertexEdge: vertexEdges) {
+                    if (vertexEdge != null && vertexEdge.equals(edge)) continue;
+                    otherEdges.add(vertexEdge);
+                }
+
+                boolean flag = true;
+                for (Edge otherEdge: otherEdges) {
+                    if (otherEdge != null && otherEdge.getRoad() != null && otherEdge.getRoad().getOwner().equals(this)) {
+                        flag = false;
+                        break;
                     }
                 }
 
-                for (Edge availableEdge : availableEdges) {
-                    longestRoad = Math.max(longestRoad, longestRoad(availableEdge.getRoad(), roadsVisited));
-                }
+                if (flag) endpointEdges.add(road.getEdge());
             }
         }
 
-        return 1 + longestRoad;
+        return endpointEdges;
     }
 
     public ArrayList<Structure> getStructures() {

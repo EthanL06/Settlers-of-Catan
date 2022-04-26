@@ -99,7 +99,7 @@ public class Board {
             tile.getEdge(location.getOrientation()).setRoad(road);
             road.setEdge(tile.getEdge(location.getOrientation()));
 
-            GameState.getCurrentPlayer().updateLongestRoad();
+            // GameState.getCurrentPlayer().updateLongestRoad();
 
             System.out.println("Current tile edges: " + Arrays.toString(tile.getEdges()));
             Tile[] adjacentTiles = tile.getAdjacentTiles();

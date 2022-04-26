@@ -36,7 +36,7 @@ public class GameState {
 
         while (true) {
             placeRoad();
-            System.out.println("LONGEST ROAD: " + currentPlayer.getLengthOfLongestRoad());
+            System.out.println("LONGEST ROAD: " + currentPlayer.longestRoad());
         }
 
 //        setUpPhase();
