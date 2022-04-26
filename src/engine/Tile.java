@@ -5,6 +5,8 @@ import engine.helper.Edge;
 import engine.helper.Location;
 import engine.helper.Vertex;
 
+import java.util.Arrays;
+
 public class Tile {
     public static final int NORTHWEST = 0, NORTH = 1, NORTHEAST = 2, SOUTHEAST = 3, SOUTH = 4, SOUTHWEST = 5;
 
@@ -325,11 +327,13 @@ public class Tile {
                     adjacentEdges[0] = edges[Edge.NORTHWEST];
                     adjacentEdges[1] = edges[Edge.NORTH];
 
+                    System.out.println(Arrays.toString(adjacentTiles));
                     // if northern tile exists
                     if (adjacentTiles[Tile.NORTH] != null) {
                         adjacentEdges[2] = adjacentTiles[Tile.NORTH].getEdge(Edge.SOUTHWEST);
-                    } else if (adjacentTiles[Tile.NORTHEAST] != null) {
-                        adjacentEdges[2] = adjacentTiles[Tile.NORTHEAST].getEdge(Edge.NORTHEAST);
+                    } else if (adjacentTiles[Tile.NORTHWEST] != null) {
+                        System.out.println("DONE");
+                        adjacentEdges[2] = adjacentTiles[Tile.NORTHWEST].getEdge(Edge.NORTHEAST);
                     }
                 }
                 case Vertex.NORTHEAST -> {
@@ -351,6 +355,7 @@ public class Tile {
                     } else if (adjacentTiles[Tile.SOUTHEAST] != null) {
                         adjacentEdges[2] = adjacentTiles[Tile.SOUTHEAST].getEdge(Tile.NORTH);
                     }
+
                 }
                 case Vertex.SOUTHEAST -> {
                     adjacentEdges[0] = edges[Edge.SOUTHEAST];

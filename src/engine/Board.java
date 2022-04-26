@@ -94,9 +94,12 @@ public class Board {
             System.out.println("Player placed a road");
 
             Road road = new Road(location, GameState.getCurrentPlayer());
+
             GameState.getCurrentPlayer().addRoad(road);
             tile.getEdge(location.getOrientation()).setRoad(road);
             road.setEdge(tile.getEdge(location.getOrientation()));
+
+            GameState.getCurrentPlayer().updateLongestRoad();
 
             System.out.println("Current tile edges: " + Arrays.toString(tile.getEdges()));
             Tile[] adjacentTiles = tile.getAdjacentTiles();
@@ -150,6 +153,7 @@ public class Board {
         for (Structure s: playerStructures) {
             Vertex vertex = s.getVertex();
             Edge[] adjacentEdges = vertex.getAdjacentEdges();
+            System.out.println(Arrays.toString(adjacentEdges));
 
             for (Edge e: adjacentEdges) {
                 if (e == null) continue;

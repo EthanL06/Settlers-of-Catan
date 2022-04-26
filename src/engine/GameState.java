@@ -32,15 +32,22 @@ public class GameState {
 
         initializePlayers(numPlayers);
 
-        setUpPhase();
+        placeSettlement();
 
         while (true) {
-            resourceProductionPhase();
-            tradePhase();
-            buyPhase();
-
-            nextTurn();
+            placeRoad();
+            System.out.println("LONGEST ROAD: " + currentPlayer.getLengthOfLongestRoad());
         }
+
+//        setUpPhase();
+//
+//        while (true) {
+//            resourceProductionPhase();
+//            tradePhase();
+//            buyPhase();
+//
+//            nextTurn();
+//        }
 
     }
 
