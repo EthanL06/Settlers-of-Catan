@@ -32,6 +32,7 @@ public class GameState {
 
         initializePlayers(numPlayers);
 
+        nextTurn();
         placeSettlement();
 
         while (true) {

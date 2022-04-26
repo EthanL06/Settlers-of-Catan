@@ -32,4 +32,8 @@ public class Road {
         return owner;
     }
 
+    public String toString() {
+        return edge.toString();
+    }
+
 }

@@ -75,18 +75,21 @@ public class Player {
         // TODO: need to implement
     }
 
-    // look at bug on figma
     public int longestRoad() {
         ArrayList<Edge> endpointEdges = getEndpointEdges();
+
+        // use any edge if no endpoint edges found
+        if (endpointEdges.size() == 0 && !roads.isEmpty()) endpointEdges.add(roads.get(0).getEdge());
 
         int longestRoad = 0;
 
         for (Edge edge: endpointEdges) {
-            Vertex[] adjacentVertices = edge.getAdjacentVertices();
+            Vertex[] adjacentVertices = edge.getAdjacentVertices(); // get the two vertices of the edge
 
             for (Vertex vertex: adjacentVertices) {
-                Edge[] adjacentEdges = vertex.getAdjacentEdges();
+                Edge[] adjacentEdges = vertex.getAdjacentEdges(); // get the edges adjacent to the vertex
 
+                // branch out from all edges adjacent to the vertex to find the longest road
                 for (Edge adjacentEdge: adjacentEdges) {
                     longestRoad = Math.max(longestRoad, longestRoad(vertex, adjacentEdge, new HashSet<>()));
                 }
@@ -101,14 +104,13 @@ public class Player {
 
         roadsVisited.add(edge.getRoad());
 
+        // get the vertex not equal to the startingVertex
         Vertex otherVertex = edge.getAdjacentVertices()[0].equals(startingVertex) ? edge.getAdjacentVertices()[1] : edge.getAdjacentVertices()[0];
 
-        HashSet<Road> roadsVisitedCopy = new HashSet<>(roadsVisited);
-        HashSet<Road> roadsVisitedCopy2 = new HashSet<>(roadsVisited);
-
-        return 1 + Math.max(longestRoad(otherVertex, otherVertex.getAdjacentEdges()[0], roadsVisitedCopy), longestRoad(otherVertex, otherVertex.getAdjacentEdges()[1], roadsVisitedCopy2));
+        return 1 + Math.max(longestRoad(otherVertex, otherVertex.getAdjacentEdges()[0], new HashSet<>(roadsVisited)), Math.max(longestRoad(otherVertex, otherVertex.getAdjacentEdges()[1], new HashSet<>(roadsVisited)), longestRoad(otherVertex, otherVertex.getAdjacentEdges()[2], new HashSet<>(roadsVisited))));
     }
 
+    // Finds all edges that only connect to one road that is owned by this player
     private ArrayList<Edge> getEndpointEdges() {
         ArrayList<Edge> endpointEdges = new ArrayList<>();
 
@@ -116,15 +118,20 @@ public class Player {
             Edge edge = road.getEdge();
             Vertex[] adjacentVertices = edge.getAdjacentVertices();
 
+            // loop through each road's vertices
             for (Vertex vertex: adjacentVertices) {
                 Edge[] vertexEdges = vertex.getAdjacentEdges();
                 ArrayList<Edge> otherEdges = new ArrayList<>();
 
+                // loop through all the adjacent edges of the vertex
+                // find which edges are not the same as the road
                 for (Edge vertexEdge: vertexEdges) {
                     if (vertexEdge != null && vertexEdge.equals(edge)) continue;
                     otherEdges.add(vertexEdge);
                 }
 
+                // loop through the other edges not the same as the road's edge
+                // if the edge is null or the road is not the same as the edge's owner, add the edge to the list
                 boolean flag = true;
                 for (Edge otherEdge: otherEdges) {
                     if (otherEdge != null && otherEdge.getRoad() != null && otherEdge.getRoad().getOwner().equals(this)) {
