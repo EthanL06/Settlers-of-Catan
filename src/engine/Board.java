@@ -57,6 +57,20 @@ public class Board {
 
             GameState.getCurrentPlayer().addStructure(structure);
 
+            // update other player's longest road (accounts for when player breaks others roads with settlement placement)
+            Edge[] adjacentEdges = structure.getVertex().getAdjacentEdges();
+            HashSet<Player> updatedPlayersLongestRoad = new HashSet<>();
+            for (Edge edge : adjacentEdges) {
+                if (edge == null || edge.getRoad() == null || edge.getRoad().getOwner().equals(GameState.getCurrentPlayer())) continue;
+
+                Player player = edge.getRoad().getOwner();
+
+                if (updatedPlayersLongestRoad.contains(player)) continue;
+
+                player.longestRoad();
+                updatedPlayersLongestRoad.add(player);
+            }
+
             System.out.println("Current tile vertices: " + Arrays.toString(tile.getVertices()));
             Tile[] adjacentTiles = tile.getAdjacentTiles();
 
@@ -95,11 +109,10 @@ public class Board {
 
             Road road = new Road(location, GameState.getCurrentPlayer());
 
-            GameState.getCurrentPlayer().addRoad(road);
             tile.getEdge(location.getOrientation()).setRoad(road);
             road.setEdge(tile.getEdge(location.getOrientation()));
 
-            // GameState.getCurrentPlayer().updateLongestRoad();
+            GameState.getCurrentPlayer().addRoad(road);
 
             System.out.println("Current tile edges: " + Arrays.toString(tile.getEdges()));
             Tile[] adjacentTiles = tile.getAdjacentTiles();
@@ -263,10 +276,6 @@ public class Board {
         return availableVertices;
     }
 
-    public DevelopmentCard drawDevelopmentCard() {
-        return developmentCards.pop();
-    }
-
     // endregion
 
     // region Resources
@@ -413,6 +422,56 @@ public class Board {
 
     // endregion
 
+    // region Development Cards
+
+    public DevelopmentCard drawDevelopmentCard() {
+        return developmentCards.pop();
+    }
+
+    // region Progress Cards
+    public boolean playMonopoly(ResourceType resource) {
+        Player currentPlayer = GameState.getCurrentPlayer();
+        int resourceCount = 0;
+
+        for (Player player: GameState.getPlayers()) {
+            if (player.equals(currentPlayer)) continue;
+
+            Stockpile stockpile = player.getStockpile();
+            int count = stockpile.getResourceCount(resource);
+
+            resourceCount += count;
+            stockpile.remove(resource, count);
+        }
+
+        currentPlayer.getStockpile().add(resource, resourceCount);
+        return true;
+    }
+
+    public boolean playYearOfPlenty(ResourceType resourceOne, ResourceType resourceTwo) {
+        if (boardStockpile.getResourceCount(resourceOne) < 1 || boardStockpile.getResourceCount(resourceTwo) < 1) {
+            System.out.println("Not enough resources to play year of plenty");
+            return false;
+        }
+
+        boardStockpile.remove(resourceOne, 1);
+        boardStockpile.remove(resourceTwo, 1);
+
+        GameState.getCurrentPlayer().getStockpile().add(resourceOne, 1);
+        GameState.getCurrentPlayer().getStockpile().add(resourceTwo, 1);
+        return true;
+    }
+
+    // need to fix if wrong location
+    public boolean playRoadBuilding(Location one, Location two) {
+        return placeRoad(one) && placeRoad(two);
+    }
+    // endregion
+
+//    public boolean playKnight(Location location) {
+//        if (!moveRobber(location)) return false;
+//    }
+
+    // endregion
     // region Initialization
     private void initializeBoard() {
         board = new Tile[5][];

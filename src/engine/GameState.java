@@ -32,23 +32,23 @@ public class GameState {
 
         initializePlayers(numPlayers);
 
-        nextTurn();
-        placeSettlement();
-
-        while (true) {
-            placeRoad();
-            System.out.println("LONGEST ROAD: " + currentPlayer.longestRoad());
-        }
-
-//        setUpPhase();
+//        nextTurn();
+//        placeSettlement();
 //
 //        while (true) {
-//            resourceProductionPhase();
-//            tradePhase();
-//            buyPhase();
-//
-//            nextTurn();
+//            placeRoad();
+//            System.out.println("LONGEST ROAD: " + currentPlayer.longestRoad());
 //        }
+
+        setUpPhase();
+
+        while (true) {
+            resourceProductionPhase();
+            tradePhase();
+            buyPhase();
+
+            nextTurn();
+        }
 
     }
 
@@ -412,7 +412,7 @@ public class GameState {
         System.out.println("+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=+");
     }
 
-    // verify that trader has sufficient resources
+    // verify that trader has sufficient resources given proposed trade
     public boolean verifyTrade(Stockpile traderStockpile, Stockpile tradingResources) {
         return traderStockpile.getResourceCount(ResourceType.BRICK) >= tradingResources.getResourceCount(ResourceType.BRICK) &&
                 traderStockpile.getResourceCount(ResourceType.WOOL) >= tradingResources.getResourceCount(ResourceType.WOOL) &&
@@ -582,5 +582,9 @@ public class GameState {
 
     public static Player getCurrentPlayer() {
         return currentPlayer;
+    }
+
+    public static Player[] getPlayers() {
+        return players;
     }
 }

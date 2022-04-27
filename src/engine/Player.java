@@ -4,6 +4,7 @@ import engine.buildings.Road;
 import engine.buildings.Structure;
 import engine.cards.DevelopmentCard;
 import engine.enums.Color;
+import engine.enums.DevelopmentCardType;
 import engine.helper.Edge;
 import engine.helper.Vertex;
 
@@ -52,10 +53,10 @@ public class Player {
         // Update harbors player can trade with
         outer:
         for (Harbor harbor : Board.getHarbors()) {
+            if (harbors.contains(harbor)) continue;
 
             for (Vertex harborVertex : harbor.getVertices()) {
                 if (harborVertex.equals(structure.getVertex())) {
-                    System.out.println("HERE!!!");
                     harbors.add(harbor);
                     break outer;
                 }
@@ -65,14 +66,39 @@ public class Player {
 
     public void addRoad(Road road) {
         roads.add(road);
+
+        longestRoad();
     }
 
     public void addDevelopmentCard(DevelopmentCard card) {
         developmentCards.add(card);
     }
 
-    public void useDevelopmentCard() {
+    public void useDevelopmentCard(DevelopmentCardType type) {
         // TODO: need to implement
+
+        if (!hasTypeOfDevelopmentCard(type)) return;
+    }
+
+    // specifically for progress cards
+    public void useDevelopmentCard(DevelopmentCardType type, String name) {
+        if (type != DevelopmentCardType.PROGRESS) {
+            useDevelopmentCard(type);
+            return;
+        }
+
+        if (!hasTypeOfDevelopmentCard(name)) return;
+
+        switch (name.toUpperCase()) {
+            case "MONOPOLY":
+                Board.
+                break;
+            case "YEAR OF PLENTY":
+                break;
+            case "ROAD BUILDING":
+                break;
+
+        }
     }
 
     public int longestRoad() {
@@ -94,6 +120,10 @@ public class Player {
                     longestRoad = Math.max(longestRoad, longestRoad(vertex, adjacentEdge, new HashSet<>()));
                 }
             }
+        }
+
+        if (longestRoad > lengthOfLongestRoad) {
+            lengthOfLongestRoad = longestRoad;
         }
 
         return longestRoad;
@@ -155,7 +185,7 @@ public class Player {
         return roads;
     }
 
-    public int getLengthOfLongestRoad() {
+    public int getLongestRoad() {
         return lengthOfLongestRoad;
     }
 
@@ -165,6 +195,22 @@ public class Player {
 
     public ArrayList<DevelopmentCard> getDevelopmentCards() {
         return developmentCards;
+    }
+
+    public boolean hasTypeOfDevelopmentCard(DevelopmentCardType type) {
+        for (DevelopmentCard card: developmentCards) {
+            if (card.getType().equals(type)) return true;
+        }
+
+        return false;
+    }
+
+    public boolean hasTypeOfDevelopmentCard(String name) {
+        for (DevelopmentCard card: developmentCards) {
+            if (card.getName().equalsIgnoreCase(name)) return true;
+        }
+
+        return false;
     }
 
     public Stockpile getStockpile() {
